@@ -61,6 +61,7 @@ export default makeSource({
     rehypePlugins: [
       rehypeSlug,
       [
+        //@ts-expect-error
         rehypePrettyCode,
         {
           theme: "one-dark-pro",

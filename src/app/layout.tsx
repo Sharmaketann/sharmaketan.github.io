@@ -1,4 +1,6 @@
 import "./global.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -75,6 +77,8 @@ export default function RootLayout({
           <main className="mx-4  px-2 md:px-0 lg:mx-auto flex flex-col justify-between min-h-screen">
             <Header />
             {children}
+            <SpeedInsights />
+            <Analytics />
             <Footer />
           </main>
           <TailwindIndicator />

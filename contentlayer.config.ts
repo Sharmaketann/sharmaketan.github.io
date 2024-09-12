@@ -59,9 +59,8 @@ export default makeSource({
   mdx: {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
-      rehypeSlug,
       [
-        //@ts-expect-error
+        rehypeSlug,
         rehypePrettyCode,
         {
           theme: "one-dark-pro",

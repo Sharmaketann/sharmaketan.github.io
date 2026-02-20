@@ -1,7 +1,7 @@
 import { GitHubIcon, LinkIcon } from "@/components/icons";
-import { SocialLink } from "@/components/social-link";
 import { WEB_APPS } from "@/data/projects";
 import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
   project: (typeof WEB_APPS)[number];
@@ -9,47 +9,61 @@ type Props = {
 
 export const ProjectCard = ({ project }: Props) => {
   return (
-    <div
-      className="flex cursor-pointer flex-col rounded-xl transition hover:bg-zinc-50 hover:dark:bg-zinc-800/50"
-      key={project.title}
-    >
-      <Image
-        src={project.thumbnail}
-        alt={`Logo of ${project.title}`}
-        className="h-50 w-full rounded-t-lg object-cover bg-no-repeat"
-        width={0}
-        height={0}
-        unoptimized
-      />
-      <div className="p-4">
-        <a className="text-base font-semibold tracking-tight text-zinc-800 dark:text-zinc-100">
+    <div className="group flex flex-col" key={project.title}>
+      {/* Thumbnail */}
+      <div className="overflow-hidden rounded-lg mb-4 border border-gray-100 dark:border-zinc-800">
+        <Image
+          src={project.thumbnail}
+          alt={`Screenshot of ${project.title}`}
+          className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          width={600}
+          height={340}
+          unoptimized
+        />
+      </div>
+
+      {/* Title + links row */}
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
           {project.title}
-        </a>
-        <div className=" z-10 mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {project.description}
-        </div>
-        <div className="z-10 mb-6 mt-6 flex flex-wrap gap-1 ">
-          {project.tags.map((techStackItem) => (
-            <p
-              className="hover:text-primary dark:hover:text-primary inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs leading-4 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-200"
-              key={techStackItem}
-            >
-              {techStackItem}
-            </p>
-          ))}
-        </div>
-        <div className="flex items-center justify-between">
-          <SocialLink
-            icon={GitHubIcon}
+        </h3>
+        <div className="flex items-center gap-3 shrink-0 mt-0.5">
+          <Link
             href={project.repo}
-            className="h-6 w-6 flex-none"
-          />
-          <SocialLink
-            icon={LinkIcon}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Source code"
+            className="text-gray-400 dark:text-gray-500 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
+          >
+            <GitHubIcon className="h-4 w-4" />
+          </Link>
+          <Link
             href={project.external}
-            className="h-6 w-6 flex-none"
-          />
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Live site"
+            className="text-gray-400 dark:text-gray-500 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
+          >
+            <LinkIcon className="h-4 w-4" />
+          </Link>
         </div>
+      </div>
+
+      {/* Description */}
+      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 mb-3">
+        {project.description}
+      </p>
+
+      {/* Tags */}
+      <div className="flex flex-wrap gap-1.5 mt-auto">
+        {project.tags.map((tag) => (
+          <span
+            key={tag}
+            className="text-[10px] px-2 py-0.5 rounded-full border border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-gray-400"
+          >
+            {tag}
+          </span>
+        ))}
       </div>
     </div>
   );

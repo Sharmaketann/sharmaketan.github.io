@@ -1,21 +1,23 @@
-import { SOCIALS } from "@/data/socials";
-import { SocialLink } from "./social-link";
-import { siteMetadata } from "@/data/siteMetadata";
+import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
+import { FooterGame } from "./footer-game";
 
 export function Footer() {
   return (
-    <footer className="flex justify-center align-center pt-10 pb-5 h-20px">
-      <p className="text-gray-500  dark:text-gray-400 text-sm">
-        © {new Date().getFullYear()}&nbsp;
-        <a
-          href={siteMetadata.social.x}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Sharma Ketan.
-        </a>
-        &nbsp; All rights reserved.
-      </p>
+    <footer>
+      <FooterGame />
+      <div className="flex justify-center pt-6 pb-5">
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
+          © {new Date().getFullYear()}&nbsp;
+          <a
+            href={PORTFOLIO_CONFIG.socials.xProfile}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {PORTFOLIO_CONFIG.name}.
+          </a>
+          &nbsp; All rights reserved.
+        </p>
+      </div>
     </footer>
   );
 }

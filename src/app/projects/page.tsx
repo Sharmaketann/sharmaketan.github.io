@@ -1,9 +1,7 @@
 import { generatePageMetadata } from "../seo";
 import { ProjectCard } from "../../components/project-card";
 import React from "react";
-import { WEB_APPS, TOOLS } from "@/data/projects";
-import { SocialLink } from "@/components/social-link";
-import { GitHubIcon, LinkIcon } from "@/components/icons";
+import { WEB_APPS } from "@/data/projects";
 
 export const metadata = generatePageMetadata({
   title: "Projects",
@@ -15,10 +13,23 @@ export default function Projects() {
   return (
     <React.Fragment>
       <section>
-        <h1 className="mb-4 text-2xl font-bold tracking-tighter">Web apps</h1>
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="h-1.5 w-1.5 rounded-full shrink-0"
+              style={{ backgroundColor: "#b86440" }}
+            />
+            <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
+              Work
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            Projects
+          </h1>
+        </div>
         <div
           role="list"
-          className="grid grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 "
+          className="grid grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-2"
         >
           {WEB_APPS.map((project, idx) => (
             <ProjectCard project={project} key={idx} />
@@ -26,38 +37,6 @@ export default function Projects() {
         </div>
       </section>
 
-      {/* <section className="py-10">
-        <h1 className="mb-4 text-2xl font-bold tracking-tighter">Tools</h1>
-
-        <div role="list" className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {TOOLS.map((project, idx) => (
-            <div
-              key={idx}
-              className="flex cursor-pointer flex-col
-              space-y-4
-              rounded-xl transition hover:bg-zinc-50 hover:dark:bg-zinc-800/50 p-3"
-            >
-              <p>{project.title}</p>
-              <p className="text-gray-500 dark:text-gray-400">
-                {project.description}
-              </p>
-
-              <div className="flex space-x-2 self-end">
-                <SocialLink
-                  href={project.repo}
-                  className="h-6 w-6 flex-none"
-                  icon={GitHubIcon}
-                />
-                <SocialLink
-                  href={project.external}
-                  className="h-6 w-6 flex-none"
-                  icon={LinkIcon}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section> */}
     </React.Fragment>
   );
 }

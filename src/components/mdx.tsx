@@ -22,8 +22,9 @@ function CustomLink(props: { href: string; children: React.ReactNode }) {
   return <a target="_blank" rel="noopener noreferrer" {...props} />;
 }
 
-function RoundedImage(props: { alt: string; src: string }) {
-  return <Image {...props} alt={props.alt} className="rounded-lg" />;
+function RoundedImage(props: { alt: string; src: string; width?: number; height?: number }) {
+  const isSvg = props.src.endsWith(".svg");
+  return <Image {...props} alt={props.alt} className="rounded-lg" unoptimized={isSvg} />;
 }
 
 function Callout(props: { emoji: string; children: React.ReactNode }) {

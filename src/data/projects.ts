@@ -1,3 +1,23 @@
+/** Shape for items in the WEB_APPS array. Reference this when adding new projects. */
+export interface WebApp {
+  title: string;
+  tags: readonly string[];
+  description: string;
+  thumbnail: string;
+  repo: string;
+  external: string;
+  demo?: string;
+}
+
+/** Shape for items in the TOOLS array. Reference this when adding new tools. */
+export interface Tool {
+  title: string;
+  description: string;
+  techs: readonly string[];
+  repo: string;
+  external: string;
+}
+
 export const WEB_APPS = [
   {
     title: "Ginger Fresh°",

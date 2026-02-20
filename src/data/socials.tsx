@@ -1,24 +1,20 @@
-import {
-  GitHubIcon,
-  InstagramIcon,
-  LinkedInIcon,
-  XIcon,
-} from "../components/icons";
+import { GitHubIcon, LinkedInIcon, XIcon } from "../components/icons";
+import { PORTFOLIO_CONFIG } from "./portfolio.config";
 
 export const SOCIALS = [
   {
     label: "GitHub",
-    href: "https://github.com/sharmaketann",
+    href: PORTFOLIO_CONFIG.socials.github,
     icon: GitHubIcon,
   },
   {
     label: "X",
-    href: "https://x.com/sharmaketann",
+    href: PORTFOLIO_CONFIG.socials.x,
     icon: XIcon,
   },
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/in/sharmaketann",
+    href: PORTFOLIO_CONFIG.socials.linkedin,
     icon: LinkedInIcon,
   },
 ];

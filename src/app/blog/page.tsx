@@ -1,6 +1,5 @@
 import { BlogCard } from "@/components/blog-card";
 import { allBlogs } from "contentlayer/generated";
-import { Metadata } from "next";
 import { generatePageMetadata } from "../seo";
 import Link from "next/link";
 import { ENV } from "@/lib/env";
@@ -24,12 +23,23 @@ export default function Blog() {
 
   return (
     <section>
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-3">
+          <span
+            className="h-1.5 w-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: "#b86440" }}
+          />
+          <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
+            Writing
+          </span>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          All posts
+        </h1>
+      </div>
       <ul>
         {undraftedBlogs.map((blog) => (
-          <li
-            key={blog.slug}
-            className="py-1 divide-y divide-gray-200 dark:divide-gray-700"
-          >
+          <li key={blog.slug}>
             <Link href={`/blog/${blog.slug}`}>
               <BlogCard blog={blog} />
             </Link>

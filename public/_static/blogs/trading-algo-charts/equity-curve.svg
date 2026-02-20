@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" width="1280" height="480">
+  <!-- Background -->
+  <rect width="1280" height="480" fill="#ffffff"/>
+
+  <!-- Chart area bounds: left=100, right=1180, top=60, bottom=420 -->
+
+  <!-- Horizontal grid lines -->
+  <line x1="100" y1="420" x2="1180" y2="420" stroke="#f0f0f0" stroke-width="1"/>
+  <line x1="100" y1="330" x2="1180" y2="330" stroke="#f0f0f0" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="100" y1="240" x2="1180" y2="240" stroke="#f0f0f0" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="100" y1="150" x2="1180" y2="150" stroke="#f0f0f0" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="100" y1="60"  x2="1180" y2="60"  stroke="#f0f0f0" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- Zero reference line -->
+  <line x1="100" y1="420" x2="1180" y2="420" stroke="#d1d5db" stroke-width="1.5"/>
+
+  <!-- Vertical grid lines (every 4 trades) -->
+  <line x1="316" y1="60" x2="316" y2="420" stroke="#f5f5f5" stroke-width="1"/>
+  <line x1="532" y1="60" x2="532" y2="420" stroke="#f5f5f5" stroke-width="1"/>
+  <line x1="748" y1="60" x2="748" y2="420" stroke="#f5f5f5" stroke-width="1"/>
+  <line x1="964" y1="60" x2="964" y2="420" stroke="#f5f5f5" stroke-width="1"/>
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#22c55e" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#22c55e" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Area fill -->
+  <path d="M 100,420
+           L 208,375
+           L 316,393
+           L 424,306
+           L 532,333
+           L 640,234
+           L 748,258
+           L 856,165
+           L 964,186
+           L 1072,105
+           L 1180,60
+           L 1180,420
+           Z"
+        fill="url(#equityGrad)"/>
+
+  <!-- Equity line -->
+  <path d="M 100,420
+           L 208,375
+           L 316,393
+           L 424,306
+           L 532,333
+           L 640,234
+           L 748,258
+           L 856,165
+           L 964,186
+           L 1072,105
+           L 1180,60"
+        fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Data point dots -->
+  <circle cx="100"  cy="420" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="208"  cy="375" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="316"  cy="393" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="424"  cy="306" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="532"  cy="333" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="640"  cy="234" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="748"  cy="258" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="856"  cy="165" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="964"  cy="186" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="1072" cy="105" r="4" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+  <circle cx="1180" cy="60"  r="5" fill="#22c55e" stroke="#fff" stroke-width="2"/>
+
+  <!-- Y-axis labels -->
+  <text x="88" y="424" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="end">$0</text>
+  <text x="88" y="334" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="end">$300</text>
+  <text x="88" y="244" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="end">$600</text>
+  <text x="88" y="154" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="end">$900</text>
+  <text x="88" y="64"  font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="end">$1,200</text>
+
+  <!-- X-axis labels -->
+  <text x="100"  y="442" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">Trade 0</text>
+  <text x="316"  y="442" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">Trade 4</text>
+  <text x="532"  y="442" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">Trade 8</text>
+  <text x="748"  y="442" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">Trade 12</text>
+  <text x="964"  y="442" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">Trade 16</text>
+  <text x="1180" y="442" font-family="-apple-system,sans-serif" font-size="12" fill="#9ca3af" text-anchor="middle">Trade 20</text>
+
+  <!-- Chart title -->
+  <text x="640" y="28" font-family="-apple-system,sans-serif" font-size="14" font-weight="600" fill="#374151" text-anchor="middle">Equity Curve — Cumulative PnL</text>
+
+  <!-- Final value callout -->
+  <rect x="1100" y="42" width="72" height="26" rx="6" fill="#22c55e" fill-opacity="0.12"/>
+  <text x="1136" y="59" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#16a34a" text-anchor="middle">+$1,200</text>
+
+  <!-- Left axis border -->
+  <line x1="100" y1="60" x2="100" y2="420" stroke="#e5e7eb" stroke-width="1"/>
+</svg>

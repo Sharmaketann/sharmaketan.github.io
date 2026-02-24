@@ -9,8 +9,8 @@ export const PORTFOLIO_CONFIG = {
   name: "Sharma Ketan",
   email: "sharmaketann@gmail.com",
   currentEmployer: {
-    name: "acmecorp.com",
-    url: "https://acmecorp.com/",
+    name: "insureefficient.com",
+    url: "https://insureefficient.com/",
   },
 
   // ── Resume ───────────────────────────────────────────────────────────────

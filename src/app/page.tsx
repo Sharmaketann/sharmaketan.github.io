@@ -5,11 +5,11 @@ import { SOCIALS } from "../data/socials";
 import { SocialLink } from "@/components/social-link";
 import { allBlogs } from "contentlayer/generated";
 import { BlogCard } from "@/components/blog-card";
-import React from "react";
-import { LINKS } from "@/lib/constants";
+import React, { useState } from "react";
 import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ResumeModal } from "@/components/resume-modal";
 
 // ── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -41,6 +41,8 @@ const STATS = [
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const [resumeOpen, setResumeOpen] = useState(false);
+
   const blogs = allBlogs
     .sort(
       (a, b) =>
@@ -167,10 +169,8 @@ export default function Home() {
                 />
               ))}
 
-              <a
-                href={LINKS.RESUME}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => setResumeOpen(true)}
                 className="ml-1 text-xs tracking-wide px-4 py-2 rounded-lg border transition-colors duration-200
                            border-gray-300 dark:border-gray-700
                            text-gray-700 dark:text-gray-300
@@ -178,7 +178,7 @@ export default function Home() {
                            dark:hover:border-[#b86440] dark:hover:text-[#b86440]"
               >
                 Resume&nbsp;→
-              </a>
+              </button>
             </motion.div>
           </div>
 
@@ -324,6 +324,8 @@ export default function Home() {
           </ul>
         </motion.div>
       </section>
+
+      <ResumeModal open={resumeOpen} onClose={() => setResumeOpen(false)} />
     </React.Fragment>
   );
 }

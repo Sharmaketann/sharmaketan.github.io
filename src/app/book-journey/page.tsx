@@ -56,12 +56,12 @@ const stages = [
   },
   {
     id: 4,
-    period: "Nov 2023 – Present",
+    period: "Nov 2023 – Dec 2025",
     location: "Insure Efficient · Mumbai",
     title: "Full Stack Lead Developer",
     icon: "🌟",
     description:
-      "Leading a team to build insurance technology that actually works. From a scalable POS portal to deep API integrations across 13+ companies — shipping features that matter.",
+      "Led a team to build insurance technology that actually works. From a scalable POS portal to deep API integrations across 13+ companies — shipped features that matter.",
     achievements: [
       "Led development of a scalable Point of Sale portal, boosting engagement by 20%",
       "Successfully integrated 200+ APIs from 13+ insurance companies",
@@ -70,6 +70,21 @@ const stages = [
       "Awarded for outstanding performance on the new POS portal",
     ],
     tags: ["Node.js", "React", "Redux", "Express", "TailwindCSS", "MySQL", "AWS EC2"],
+  },
+  {
+    id: 5,
+    period: "Jan 2025 – Present",
+    location: "Acme Corp · Mumbai",
+    title: "Senior Full Stack Engineer",
+    icon: "🚀",
+    description:
+      "Building scalable products and contributing to high-impact engineering initiatives across the stack.",
+    achievements: [
+      "Joined as a senior engineer to drive product development",
+      "Collaborating with cross-functional teams on core platform features",
+      "Contributing to architecture decisions and code quality improvements",
+    ],
+    tags: ["Node.js", "React", "TypeScript", "PostgreSQL", "AWS"],
   },
 ];
 

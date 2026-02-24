@@ -52,6 +52,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [siteMetadata.socialBanner],
   },
+  alternates: {
+    types: {
+      "application/rss+xml": `${siteMetadata.siteUrl}/feed.xml`,
+    },
+  },
 };
 
 export default function RootLayout({

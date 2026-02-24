@@ -9,8 +9,8 @@ export const PORTFOLIO_CONFIG = {
   name: "Sharma Ketan",
   email: "sharmaketann@gmail.com",
   currentEmployer: {
-    name: "insureefficient.com",
-    url: "https://insureefficient.com/",
+    name: "acmecorp.com",
+    url: "https://acmecorp.com/",
   },
 
   // ── Resume ───────────────────────────────────────────────────────────────
@@ -19,12 +19,12 @@ export const PORTFOLIO_CONFIG = {
 
   // ── Site ─────────────────────────────────────────────────────────────────
   site: {
-    url: "https://sharmaketan.dev",
+    url: "https://sharmaketann.in",
     title: "Sharma Ketan",
     description:
       "Sharma Ketan - Fullstack developer passionate about creating and sharing things on internet",
     socialBanner: "/_static/default-og-card.png",
-    keywords: ["Sharma Ketan", "sharmaketan", "sharmaketann", "sharmaketan.dev"],
+    keywords: ["Sharma Ketan", "sharmaketan", "sharmaketann", "sharmaketann.in"],
   },
 
   // ── Social links ─────────────────────────────────────────────────────────

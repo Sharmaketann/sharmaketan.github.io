@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggler } from "./theme-toggle";
@@ -21,11 +22,15 @@ export function Header() {
       <nav className="flex items-center justify-between">
 
         {/* ── Logo / site name ─────────────────────────────────── */}
-        <Link
-          href="/"
-          className="text-sm font-semibold tracking-widest uppercase text-gray-900 dark:text-gray-100 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
-        >
-          SK
+        <Link href="/" aria-label="Home" className="inline-block">
+          <Image
+            src="/_static/favicons/logo.png"
+            alt="Sharma Ketan"
+            width={80}
+            height={80}
+            className="scale-150 origin-left [mix-blend-mode:multiply] dark:invert dark:[mix-blend-mode:screen] transition-[filter] duration-300"
+            priority
+          />
         </Link>
 
         {/* ── Nav links ────────────────────────────────────────── */}

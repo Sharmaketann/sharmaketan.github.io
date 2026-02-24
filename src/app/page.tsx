@@ -38,6 +38,38 @@ const STATS = [
   { value: "3",   label: "Industry domains" },
 ];
 
+// ── Structured data ───────────────────────────────────────────────────────────
+
+const JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Sharma Ketan",
+    url: PORTFOLIO_CONFIG.site.url,
+    jobTitle: "Full Stack Developer",
+    knowsAbout: ["TypeScript", "React", "Next.js", "Node.js", "MongoDB", "PostgreSQL", "AWS"],
+    sameAs: [
+      PORTFOLIO_CONFIG.socials.github,
+      PORTFOLIO_CONFIG.socials.linkedin,
+      PORTFOLIO_CONFIG.socials.x,
+    ],
+    email: PORTFOLIO_CONFIG.email,
+    worksFor: {
+      "@type": "Organization",
+      name: PORTFOLIO_CONFIG.currentEmployer.name,
+      url: PORTFOLIO_CONFIG.currentEmployer.url,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    url: PORTFOLIO_CONFIG.site.url,
+    name: PORTFOLIO_CONFIG.site.title,
+    description: PORTFOLIO_CONFIG.site.description,
+    author: { "@type": "Person", name: "Sharma Ketan" },
+  },
+];
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -52,6 +84,10 @@ export default function Home() {
 
   return (
     <React.Fragment>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="pb-10">
 

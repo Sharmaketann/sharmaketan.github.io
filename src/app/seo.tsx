@@ -14,11 +14,13 @@ export function generatePageMetadata({
   image,
   ...rest
 }: OwnProps): Metadata {
+  const desc = description || siteMetadata.description;
   return {
     title,
+    description: desc,
     openGraph: {
       title: `${title} | ${siteMetadata.title}`,
-      description: description || siteMetadata.description,
+      description: desc,
       url: "./",
       siteName: siteMetadata.title,
       images: image ? [image] : [siteMetadata.socialBanner],
@@ -27,8 +29,10 @@ export function generatePageMetadata({
     },
     twitter: {
       title: `${title} | ${siteMetadata.title}`,
+      description: desc,
       card: "summary_large_image",
       images: image ? [image] : [siteMetadata.socialBanner],
+      creator: "@sharmaketann",
     },
     ...rest,
   };

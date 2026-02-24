@@ -27,12 +27,22 @@ export const metadata: Metadata = {
     template: `%s | ${siteMetadata.title}`,
   },
   description: siteMetadata.description,
+  keywords: [...siteMetadata.keywords],
+  authors: [{ name: siteMetadata.author, url: siteMetadata.siteUrl }],
+  creator: siteMetadata.author,
   openGraph: {
     title: siteMetadata.title,
     description: siteMetadata.description,
-    url: "./",
+    url: siteMetadata.siteUrl,
     siteName: siteMetadata.title,
-    images: [siteMetadata.socialBanner],
+    images: [
+      {
+        url: siteMetadata.socialBanner,
+        width: 1200,
+        height: 630,
+        alt: siteMetadata.title,
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
@@ -49,10 +59,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: siteMetadata.title,
+    description: siteMetadata.description,
     card: "summary_large_image",
     images: [siteMetadata.socialBanner],
+    creator: "@sharmaketann",
   },
   alternates: {
+    canonical: siteMetadata.siteUrl,
     types: {
       "application/rss+xml": `${siteMetadata.siteUrl}/feed.xml`,
     },

@@ -9,9 +9,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: post.publishedAt,
   }));
 
-  const routes = ["", "blog", "projects"].map((route) => ({
+  const routes = ["", "blog", "projects", "book-journey", "colophon"].map((route) => ({
     url: `${siteUrl}/${route}`,
     lastModified: new Date().toISOString().split("T")[0],
+    changeFrequency: route === "" ? "weekly" : "monthly" as "weekly" | "monthly",
+    priority: route === "" ? 1.0 : 0.8,
   }));
 
   return [...routes, ...blogRoutes];

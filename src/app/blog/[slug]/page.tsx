@@ -23,11 +23,15 @@ export async function generateMetadata({
     return;
   }
 
-  const ogImage = `${siteMetadata.siteUrl}/og?title=${blog.title}`;
+  const ogImage = `${siteMetadata.siteUrl}/og?title=${encodeURIComponent(blog.title)}`;
+  const canonicalUrl = `${siteMetadata.siteUrl}/blog/${params.slug}`;
 
   return {
     title: blog.title,
     description: blog.summary,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: blog.title,
       description: blog.summary,
@@ -35,8 +39,8 @@ export async function generateMetadata({
       locale: "en_US",
       type: "article",
       publishedTime: blog.publishedAt,
-      url: "./",
-      authors: siteMetadata.author,
+      url: canonicalUrl,
+      authors: [siteMetadata.author],
       images: [
         {
           url: ogImage,
@@ -51,6 +55,7 @@ export async function generateMetadata({
       title: blog.title,
       description: blog.summary,
       images: [ogImage],
+      creator: "@sharmaketann",
     },
   };
 }
@@ -62,8 +67,32 @@ export default async function Blog({ params }: { params: { slug: string } }) {
     return <NotFound />;
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: blog.title,
+    description: blog.summary,
+    datePublished: blog.publishedAt,
+    dateModified: blog.publishedAt,
+    url: `${siteMetadata.siteUrl}/blog/${blog.slug}`,
+    author: {
+      "@type": "Person",
+      name: siteMetadata.author,
+      url: siteMetadata.siteUrl,
+    },
+    publisher: {
+      "@type": "Person",
+      name: siteMetadata.author,
+      url: siteMetadata.siteUrl,
+    },
+  };
+
   return (
     <section>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <h1 className="text-2xl font-bold tracking-tighter">
         <Balancer>{blog.title}</Balancer>
       </h1>

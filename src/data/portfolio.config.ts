@@ -22,9 +22,22 @@ export const PORTFOLIO_CONFIG = {
     url: "https://sharmaketann.in",
     title: "Sharma Ketan",
     description:
-      "Sharma Ketan - Fullstack developer passionate about creating and sharing things on internet",
+      "Sharma Ketan — Full Stack Developer specializing in TypeScript, React, Next.js and Node.js. Building scalable web apps and insurance technology in Mumbai, India.",
     socialBanner: "/_static/default-og-card.png",
-    keywords: ["Sharma Ketan", "sharmaketan", "sharmaketann", "sharmaketann.in"],
+    keywords: [
+      "Sharma Ketan",
+      "sharmaketan",
+      "sharmaketann",
+      "sharmaketann.in",
+      "Full Stack Developer",
+      "React Developer",
+      "Next.js Developer",
+      "Node.js Developer",
+      "TypeScript",
+      "MERN Stack",
+      "Web Developer Mumbai",
+      "JavaScript Developer India",
+    ],
   },
 
   // ── Social links ─────────────────────────────────────────────────────────

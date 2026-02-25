@@ -14,14 +14,18 @@ export function middleware(req: NextRequest) {
     // blog.sharmaketann.in/blog/my-post → blog.sharmaketann.in/my-post
     if (pathname.startsWith("/blog")) {
       const cleanPath = pathname.replace(/^\/blog/, "") || "/";
-      return NextResponse.redirect(new URL(cleanPath, req.url));
+      const redirectUrl = req.nextUrl.clone();
+      redirectUrl.pathname = cleanPath;
+      return NextResponse.redirect(redirectUrl);
     }
 
     // Rewrite clean paths to internal /blog/* routes
     // blog.sharmaketann.in/         → /blog
     // blog.sharmaketann.in/my-post  → /blog/my-post
     const rewritePath = pathname === "/" ? "/blog" : `/blog${pathname}`;
-    return NextResponse.rewrite(new URL(rewritePath, req.url));
+    const rewriteUrl = req.nextUrl.clone();
+    rewriteUrl.pathname = rewritePath;
+    return NextResponse.rewrite(rewriteUrl);
   }
 
   return NextResponse.next();

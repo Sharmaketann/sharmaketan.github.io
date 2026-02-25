@@ -19,13 +19,14 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    // Rewrite clean paths to internal /blog/* routes
-    // blog.sharmaketann.in/         → /blog
+    // Rewrite clean slug paths to internal /blog/* routes
     // blog.sharmaketann.in/my-post  → /blog/my-post
-    const rewritePath = pathname === "/" ? "/blog" : `/blog${pathname}`;
-    const rewriteUrl = req.nextUrl.clone();
-    rewriteUrl.pathname = rewritePath;
-    return NextResponse.rewrite(rewriteUrl);
+    // (/ is handled directly by page.tsx via headers())
+    if (pathname !== "/") {
+      const rewriteUrl = req.nextUrl.clone();
+      rewriteUrl.pathname = `/blog${pathname}`;
+      return NextResponse.rewrite(rewriteUrl);
+    }
   }
 
   return NextResponse.next();

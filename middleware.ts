@@ -9,11 +9,18 @@ export function middleware(req: NextRequest) {
   if (isBlogSubdomain) {
     const { pathname } = req.nextUrl;
 
+    // Strip /blog prefix and redirect to clean URL
+    // blog.sharmaketann.in/blog         → blog.sharmaketann.in/
+    // blog.sharmaketann.in/blog/my-post → blog.sharmaketann.in/my-post
+    if (pathname.startsWith("/blog")) {
+      const cleanPath = pathname.replace(/^\/blog/, "") || "/";
+      return NextResponse.redirect(new URL(cleanPath, req.url));
+    }
+
+    // Rewrite clean paths to internal /blog/* routes
     // blog.sharmaketann.in/         → /blog
     // blog.sharmaketann.in/my-post  → /blog/my-post
-    const rewritePath =
-      pathname === "/" ? "/blog" : `/blog${pathname}`;
-
+    const rewritePath = pathname === "/" ? "/blog" : `/blog${pathname}`;
     return NextResponse.rewrite(new URL(rewritePath, req.url));
   }
 

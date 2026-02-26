@@ -28,7 +28,7 @@ export function Header() {
             alt="Sharma Ketan"
             width={80}
             height={80}
-            className="scale-150 origin-left [mix-blend-mode:multiply] dark:invert dark:[mix-blend-mode:screen] transition-[filter] duration-300"
+            className="scale-[3] origin-center [mix-blend-mode:multiply] dark:invert dark:[mix-blend-mode:screen] transition-[filter] duration-300"
             priority
           />
         </Link>

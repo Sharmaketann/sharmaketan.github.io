@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
             alignItems: "flex-start",
             justifyContent: "center",
             color: "white",
-            backgroundImage: `url(${siteMetadata.siteUrl}/_static/blog-og-card.png)`,
+            background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
           }}
         >
           <div

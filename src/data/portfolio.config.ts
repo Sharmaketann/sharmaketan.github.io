@@ -23,7 +23,7 @@ export const PORTFOLIO_CONFIG = {
     title: "Sharma Ketan",
     description:
       "Sharma Ketan — Full Stack Developer specializing in TypeScript, React, Next.js and Node.js. Building scalable web apps and insurance technology in Mumbai, India.",
-    socialBanner: "/_static/default-og-card.png",
+    socialBanner: "/og?title=Sharma+Ketan",
     keywords: [
       "Sharma Ketan",
       "sharmaketan",

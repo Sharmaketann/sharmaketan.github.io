@@ -65,26 +65,26 @@ const stages = [
     achievements: [
       "Led development of a scalable Point of Sale portal, boosting engagement by 20%",
       "Successfully integrated 200+ APIs from 13+ insurance companies",
-      "Responsible for security and integrity of all backend systems",
-      "Collaborating with Risk team and DevOps for smooth deployments",
+      "Owned security and integrity of all backend systems",
+      "Partnered with the Risk team and DevOps for smooth deployments",
       "Awarded for outstanding performance on the new POS portal",
     ],
     tags: ["Node.js", "React", "Redux", "Express", "TailwindCSS", "MySQL", "AWS EC2"],
   },
   {
     id: 5,
-    period: "Jan 2025 – Present",
-    location: "Acme Corp · Mumbai",
-    title: "Senior Full Stack Engineer",
-    icon: "🚀",
+    period: "Jan 2026 – Present",
+    location: "Wizzer AdvisorTech · Mumbai",
+    title: "Senior Backend Developer",
+    icon: "📈",
     description:
-      "Building scalable products and contributing to high-impact engineering initiatives across the stack.",
+      "Moved from insurance into capital markets. Building the backend behind an AI-driven quant and algo trading terminal — market data, backtesting and live execution in one platform.",
     achievements: [
-      "Joined as a senior engineer to drive product development",
-      "Collaborating with cross-functional teams on core platform features",
-      "Contributing to architecture decisions and code quality improvements",
+      "Building backend services for a unified trading and strategy terminal",
+      "Working across market data, strategy backtesting and order execution",
+      "Supporting registered investment advisors, wealth managers and quant desks",
     ],
-    tags: ["Node.js", "React", "TypeScript", "PostgreSQL", "AWS"],
+    tags: ["Node.js", "TypeScript", "PostgreSQL", "REST API", "AWS"],
   },
 ];
 
@@ -123,8 +123,8 @@ export default function BookJourney() {
           {...fadeUp(0.16)}
           className="text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed"
         >
-          From a BBA classroom in Pune to leading full-stack teams in Mumbai —
-          the real chapters, straight from the resume.
+          From a BBA classroom in Pune to building trading infrastructure in
+          Mumbai — the real chapters, straight from the resume.
         </motion.p>
       </div>
 

@@ -9,8 +9,8 @@ export const PORTFOLIO_CONFIG = {
   name: "Sharma Ketan",
   email: "sharmaketann@gmail.com",
   currentEmployer: {
-    name: "insureefficient.com",
-    url: "https://insureefficient.com/",
+    name: "wizzer.in",
+    url: "https://wizzer.in/",
   },
 
   // ── Resume ───────────────────────────────────────────────────────────────
@@ -22,13 +22,14 @@ export const PORTFOLIO_CONFIG = {
     url: "https://sharmaketann.in",
     title: "Sharma Ketan",
     description:
-      "Sharma Ketan — Full Stack Developer specializing in TypeScript, React, Next.js and Node.js. Building scalable web apps and insurance technology in Mumbai, India.",
+      "Sharma Ketan — Senior Backend Developer specializing in TypeScript, Node.js, React and Next.js. Building algo-trading and insurance technology in Mumbai, India.",
     socialBanner: "/og?title=Sharma+Ketan",
     keywords: [
       "Sharma Ketan",
       "sharmaketan",
       "sharmaketann",
       "sharmaketann.in",
+      "Senior Backend Developer",
       "Full Stack Developer",
       "React Developer",
       "Next.js Developer",
@@ -37,6 +38,8 @@ export const PORTFOLIO_CONFIG = {
       "MERN Stack",
       "Web Developer Mumbai",
       "JavaScript Developer India",
+      "Backend Developer Mumbai",
+      "Fintech Developer India",
     ],
   },
 

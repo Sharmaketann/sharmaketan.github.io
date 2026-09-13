@@ -22,9 +22,9 @@ const fadeUp = (delay = 0) => ({
 // ── What I focus on ──────────────────────────────────────────────────────────
 
 const FOCUS = [
-  "Full-stack web application development",
-  "API design, integration & backend architecture",
-  "Insurance technology & scalable product teams",
+  "Backend systems & distributed service architecture",
+  "API design, integration & data pipelines",
+  "Trading infrastructure, fintech & insurance technology",
 ];
 
 const TECH = [
@@ -33,7 +33,7 @@ const TECH = [
 ];
 
 const STATS = [
-  { value: "3+",  label: "Years exp."       },
+  { value: "4+",  label: "Years exp."       },
   { value: "13+", label: "Projects shipped" },
   { value: "3",   label: "Industry domains" },
 ];
@@ -46,8 +46,8 @@ const JSON_LD = [
     "@type": "Person",
     name: "Sharma Ketan",
     url: PORTFOLIO_CONFIG.site.url,
-    jobTitle: "Full Stack Developer",
-    knowsAbout: ["TypeScript", "React", "Next.js", "Node.js", "MongoDB", "PostgreSQL", "AWS"],
+    jobTitle: "Senior Backend Developer",
+    knowsAbout: ["TypeScript", "Node.js", "React", "Next.js", "MongoDB", "PostgreSQL", "AWS"],
     sameAs: [
       PORTFOLIO_CONFIG.socials.github,
       PORTFOLIO_CONFIG.socials.linkedin,
@@ -104,7 +104,7 @@ export default function Home() {
                 style={{ backgroundColor: "#b86440" }}
               />
               <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
-                Full Stack Developer
+                Senior Backend Developer
               </span>
             </motion.div>
 
@@ -140,8 +140,8 @@ export default function Home() {
               {...fadeUp(0.32)}
               className="text-gray-600 dark:text-gray-300 max-w-sm mb-7 leading-relaxed text-sm md:text-base"
             >
-              Building scalable web apps with JavaScript & the MERN stack.
-              Currently shaping insurance tech at{" "}
+              Building scalable backend systems with TypeScript & Node.js.
+              Currently building algo-trading infrastructure at{" "}
               <a
                 href={PORTFOLIO_CONFIG.currentEmployer.url}
                 target="_blank"
@@ -280,7 +280,7 @@ export default function Home() {
                 <p className="pl-3">
                   <span style={{ color: "#c3e88d" }}>role</span>
                   <span className="text-gray-400">:</span>{" "}
-                  <span style={{ color: "#f78c6c" }}>&quot;FullStack&quot;</span>
+                  <span style={{ color: "#f78c6c" }}>&quot;Backend&quot;</span>
                   <span className="text-gray-400">,</span>
                 </p>
                 <p className="pl-3">

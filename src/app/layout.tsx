@@ -94,7 +94,7 @@ export default function RootLayout({
       <Head />
       <body
         className={cn(
-          "mx-auto min-h-screen max-w-5xl antialiased dark:bg-zinc-950 dark:text-gray-100",
+          "mx-auto min-h-screen max-w-5xl antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
           space_grotesk.className,
         )}
       >

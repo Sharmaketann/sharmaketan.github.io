@@ -33,10 +33,19 @@ const TECH = [
 ];
 
 const STATS = [
-  { value: "4+",  label: "Years exp."       },
-  { value: "13+", label: "Projects shipped" },
-  { value: "3",   label: "Industry domains" },
+  { value: "4+",   label: "Years shipping"     },
+  { value: "200+", label: "APIs integrated"    },
+  { value: "13+",  label: "Insurers connected" },
 ];
+
+// ── What I'm working on right now ────────────────────────────────────────────
+
+const CURRENT = {
+  company: "Wizzer AdvisorTech",
+  url: "https://wizzer.in/",
+  what: "Backend for an AI quant & algo trading terminal — market data, backtesting and live execution.",
+  stack: ["Node.js", "TypeScript", "PostgreSQL", "AWS"],
+};
 
 // ── Structured data ───────────────────────────────────────────────────────────
 
@@ -92,10 +101,10 @@ export default function Home() {
       <section className="pb-10">
 
         {/* ── Main block: text left, photo right ── */}
-        <div className="flex flex-col-reverse md:flex-row md:items-start md:justify-between gap-8 md:gap-14 pt-2">
+        <div className="grid md:grid-cols-12 gap-10 md:gap-12 pt-2 items-start">
 
           {/* ── Left: editorial text ── */}
-          <div className="flex-1 min-w-0">
+          <div className="md:col-span-7 min-w-0">
 
             {/* Role label */}
             <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-6">
@@ -108,14 +117,14 @@ export default function Home() {
               </span>
             </motion.div>
 
-            {/* Name — editorial split */}
-            <div className="mb-7 leading-[0.92]">
-              <motion.div
+            {/* Name — wordmark */}
+            <div className="mb-6 leading-[0.95]">
+              <motion.h1
                 {...fadeUp(0.08)}
-                className="text-[clamp(3rem,9vw,5.5rem)] font-bold tracking-tight text-gray-900 dark:text-gray-100 select-none"
+                className="text-[clamp(2.25rem,5vw,3.25rem)] font-bold tracking-tight text-gray-900 dark:text-gray-100 select-none"
               >
-                SHARMA
-              </motion.div>
+                SHARMA <span style={{ color: "#b86440" }}>KETAN</span>
+              </motion.h1>
 
               {/* Terracotta rule */}
               <motion.div
@@ -123,25 +132,26 @@ export default function Home() {
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.48, delay: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
                 style={{ transformOrigin: "left", backgroundColor: "#b86440", height: "2px" }}
-                className="my-2 w-full"
+                className="mt-3.5 w-full max-w-sm"
               />
-
-              <motion.div
-                {...fadeUp(0.24)}
-                className="text-[clamp(3rem,9vw,5.5rem)] font-bold tracking-tight select-none"
-                style={{ color: "#b86440" }}
-              >
-                KETAN
-              </motion.div>
             </div>
+
+            {/* The claim — the loudest sentence on the page */}
+            <motion.p
+              {...fadeUp(0.24)}
+              className="text-[clamp(1.375rem,2.6vw,1.875rem)] font-medium leading-[1.25] tracking-tight text-gray-900 dark:text-gray-100 max-w-[20ch] mb-5"
+            >
+              I build the backend for systems that move money.
+            </motion.p>
 
             {/* Bio */}
             <motion.p
               {...fadeUp(0.32)}
-              className="text-gray-600 dark:text-gray-300 max-w-sm mb-7 leading-relaxed text-sm md:text-base"
+              className="text-gray-600 dark:text-gray-300 max-w-[54ch] mb-7 leading-relaxed text-sm md:text-base"
             >
-              Building scalable backend systems with TypeScript & Node.js.
-              Currently building algo-trading infrastructure at{" "}
+              Four years across insurance and capital markets. I led the team
+              behind an insurance Point of Sale platform and wired up 200+
+              carrier APIs — now I&apos;m building trading infrastructure at{" "}
               <a
                 href={PORTFOLIO_CONFIG.currentEmployer.url}
                 target="_blank"
@@ -157,10 +167,7 @@ export default function Home() {
             <motion.ul {...fadeUp(0.38)} className="space-y-2 mb-8">
               {FOCUS.map((item) => (
                 <li key={item} className="flex items-start gap-2.5">
-                  <span
-                    className="mt-[7px] h-1 w-1 rounded-full shrink-0"
-                    style={{ backgroundColor: "#b86440" }}
-                  />
+                  <span className="mt-[7px] h-1 w-1 rounded-full shrink-0 bg-gray-300 dark:bg-zinc-700" />
                   <span className="text-sm text-gray-500 dark:text-gray-400">{item}</span>
                 </li>
               ))}
@@ -173,11 +180,8 @@ export default function Home() {
             >
               {STATS.map(({ value, label }, i) => (
                 <React.Fragment key={label}>
-                  <div className="text-center">
-                    <div
-                      className="text-xl font-bold tracking-tight"
-                      style={{ color: "#b86440" }}
-                    >
+                  <div>
+                    <div className="text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-gray-100">
                       {value}
                     </div>
                     <div className="text-[11px] text-gray-400 dark:text-gray-500 tracking-wide mt-0.5">
@@ -223,7 +227,7 @@ export default function Home() {
             initial={{ opacity: 0, x: 12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex-shrink-0 self-start flex flex-col items-center gap-3"
+            className="md:col-span-5 w-full flex flex-col items-start gap-4"
           >
             <Image
               src="/_static/me1.jpg"
@@ -231,11 +235,11 @@ export default function Home() {
               height={224}
               alt={`${PORTFOLIO_CONFIG.name} — avatar`}
               priority
-              className="rounded-2xl object-cover w-36 h-36 md:w-56 md:h-56"
+              className="rounded-2xl object-cover w-28 h-28 md:w-36 md:h-36 shrink-0"
             />
 
             {/* Availability badge */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
               <span className="relative flex h-2 w-2">
                 <span
                   className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
@@ -251,53 +255,56 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Floating code card */}
+            {/* ── Currently: what I'm actually building ── */}
             <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
-              className="hidden md:block w-56 mt-1 rounded-xl border border-gray-100 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm p-3.5"
+              {...fadeUp(0.34)}
+              className="w-full rounded-xl border border-gray-200 dark:border-zinc-800 bg-gray-50/70 dark:bg-zinc-900/60 p-4"
             >
-              {/* Traffic lights */}
-              <div className="flex items-center gap-1.5 mb-3">
-                <span className="h-2 w-2 rounded-full bg-red-400/70" />
-                <span className="h-2 w-2 rounded-full bg-yellow-400/70" />
-                <span className="h-2 w-2 rounded-full bg-green-400/70" />
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+                  Currently
+                </span>
+                {/* An equity curve — the shape I stare at all day */}
+                <svg
+                  viewBox="0 0 120 32"
+                  className="h-5 w-[92px] shrink-0 overflow-visible"
+                  aria-hidden="true"
+                >
+                  <polyline
+                    points="1,26.8 6.1,25.8 11.3,26.3 16.4,24.6 21.5,23.4 26.7,24.2 31.8,22.2 36.9,21 42,21.8 47.2,19.8 52.3,18.2 57.4,18.9 62.6,17.2 67.7,15.5 72.8,16.2 77.9,14.1 83.1,12.9 88.2,13.6 93.3,11.4 98.5,9.8 103.6,8.3 108.7,9 113.8,6.9 119,5.2"
+                    fill="none"
+                    stroke="#b86440"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="119" cy="5.2" r="2.2" fill="#b86440" />
+                </svg>
               </div>
-              {/* Code lines */}
-              <div className="font-mono text-[11px] space-y-1 leading-relaxed">
-                <p>
-                  <span style={{ color: "#c792ea" }}>const</span>{" "}
-                  <span style={{ color: "#82aaff" }}>dev</span>{" "}
-                  <span className="text-gray-400">=</span>{" "}
-                  <span className="text-gray-400">{"{"}</span>
-                </p>
-                <p className="pl-3">
-                  <span style={{ color: "#c3e88d" }}>name</span>
-                  <span className="text-gray-400">:</span>{" "}
-                  <span style={{ color: "#f78c6c" }}>&quot;Ketan&quot;</span>
-                  <span className="text-gray-400">,</span>
-                </p>
-                <p className="pl-3">
-                  <span style={{ color: "#c3e88d" }}>role</span>
-                  <span className="text-gray-400">:</span>{" "}
-                  <span style={{ color: "#f78c6c" }}>&quot;Backend&quot;</span>
-                  <span className="text-gray-400">,</span>
-                </p>
-                <p className="pl-3">
-                  <span style={{ color: "#c3e88d" }}>open</span>
-                  <span className="text-gray-400">:</span>{" "}
-                  <span style={{ color: "#82aaff" }}>true</span>
-                  <span className="text-gray-400">,</span>
-                </p>
-                <p className="text-gray-400">{"}"}</p>
+
+              <a
+                href={CURRENT.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
+              >
+                {CURRENT.company} &#8599;
+              </a>
+
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-gray-500 dark:text-gray-400">
+                {CURRENT.what}
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {CURRENT.stack.map((s) => (
+                  <span
+                    key={s}
+                    className="font-mono text-[10px] px-2 py-0.5 rounded border border-gray-200 dark:border-zinc-800 text-gray-500 dark:text-gray-400"
+                  >
+                    {s}
+                  </span>
+                ))}
               </div>
-              {/* Blinking cursor */}
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="inline-block mt-1 h-3 w-1.5 rounded-sm"
-                style={{ backgroundColor: "#b86440" }}
-              />
             </motion.div>
           </motion.div>
         </div>

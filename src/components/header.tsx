@@ -22,19 +22,19 @@ export function Header() {
       <nav className="flex items-center justify-between">
 
         {/* ── Logo / site name ─────────────────────────────────── */}
-        <Link href="/" aria-label="Home" className="inline-block">
+        <Link href="/" aria-label="Home" className="inline-block shrink-0">
           <Image
-            src="/_static/favicons/logo.png"
+            src="/_static/favicons/logo-mark.png"
             alt="Sharma Ketan"
-            width={80}
-            height={80}
-            className="scale-[3] origin-center [mix-blend-mode:multiply] dark:invert dark:[mix-blend-mode:screen] transition-[filter] duration-300"
+            width={236}
+            height={160}
+            className="h-8 w-auto sm:h-10 md:h-11 [mix-blend-mode:multiply] dark:invert dark:[mix-blend-mode:screen] transition-[filter] duration-300"
             priority
           />
         </Link>
 
         {/* ── Nav links ────────────────────────────────────────── */}
-        <ul className="flex items-center gap-7">
+        <ul className="flex items-center gap-4 sm:gap-7">
           {NAV.map(({ path, name }) => {
             const active = path === "/" ? pathname === "/" : pathname.startsWith(path);
             return (

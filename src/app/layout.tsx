@@ -84,10 +84,7 @@ export default function RootLayout({
   const isBlogSubdomain = host === "blog.sharmaketann.in" || host.startsWith("blog.sharmaketann.in:");
   const isCvSubdomain = host === "cv.sharmaketann.in" || host.startsWith("cv.sharmaketann.in:");
 
-  const docId = PORTFOLIO_CONFIG.resume.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-  const downloadUrl = docId
-    ? `https://docs.google.com/document/d/${docId}/export?format=pdf`
-    : PORTFOLIO_CONFIG.resume;
+  const downloadUrl = PORTFOLIO_CONFIG.resume;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -144,9 +141,7 @@ export default function RootLayout({
                   </span>
                   <a
                     href={downloadUrl}
-                    download="Sharma_Ketan_Resume.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    download={PORTFOLIO_CONFIG.resumeFileName}
                     className="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-lg border transition-colors duration-200
                                border-gray-200 dark:border-zinc-700
                                text-gray-700 dark:text-gray-300

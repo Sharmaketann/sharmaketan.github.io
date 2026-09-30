@@ -4,24 +4,13 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
 
-function getDocId(url: string): string | null {
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  return match ? match[1] : null;
-}
-
 interface ResumeModalProps {
   open: boolean;
   onClose: () => void;
 }
 
 export function ResumeModal({ open, onClose }: ResumeModalProps) {
-  const docId = getDocId(PORTFOLIO_CONFIG.resume);
-  const previewUrl = docId
-    ? `https://docs.google.com/document/d/${docId}/preview`
-    : PORTFOLIO_CONFIG.resume;
-  const downloadUrl = docId
-    ? `https://docs.google.com/document/d/${docId}/export?format=pdf`
-    : PORTFOLIO_CONFIG.resume;
+  const resumeUrl = PORTFOLIO_CONFIG.resume;
 
   // Close on ESC
   useEffect(() => {
@@ -69,7 +58,7 @@ export function ResumeModal({ open, onClose }: ResumeModalProps) {
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
-            <div className="relative w-full max-w-3xl h-[88vh] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 flex flex-col pointer-events-auto">
+            <div className="relative w-full max-w-4xl h-[90vh] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 flex flex-col pointer-events-auto">
 
               {/* Top bar */}
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-zinc-800 flex-shrink-0">
@@ -86,10 +75,8 @@ export function ResumeModal({ open, onClose }: ResumeModalProps) {
                 <div className="flex items-center gap-2">
                   {/* Download PDF */}
                   <a
-                    href={downloadUrl}
-                    download="Sharma_Ketan_Resume.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={resumeUrl}
+                    download={PORTFOLIO_CONFIG.resumeFileName}
                     className="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-lg border transition-colors duration-200
                                border-gray-200 dark:border-zinc-700
                                text-gray-700 dark:text-gray-300
@@ -114,10 +101,10 @@ export function ResumeModal({ open, onClose }: ResumeModalProps) {
                 </div>
               </div>
 
-              {/* Google Docs preview */}
+              {/* PDF preview — served from /public, same origin */}
               <div className="flex-1 min-h-0 overflow-hidden rounded-b-2xl">
                 <iframe
-                  src={previewUrl}
+                  src={`${resumeUrl}#toolbar=1&navpanes=0&view=FitH`}
                   title="Sharma Ketan — Resume"
                   className="w-full h-full border-0"
                 />

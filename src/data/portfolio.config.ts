@@ -14,8 +14,15 @@ export const PORTFOLIO_CONFIG = {
   },
 
   // ── Resume ───────────────────────────────────────────────────────────────
-  resume:
-    "https://docs.google.com/document/d/11nailFw-GIoPC6kGwui0lhpHbt2DxQBH/edit?usp=sharing&ouid=118007732148090101784&rtpof=true&sd=true",
+  /**
+   * Served from /public. Self-hosted rather than a Google Doc so the file is
+   * real selectable text (Google Docs held the skills section as an image,
+   * which ATS parsers read as nothing) and so `download` actually works —
+   * the attribute is ignored cross-origin.
+   * To update: replace public/Sharma_Ketan_Resume.pdf.
+   */
+  resume: "/Sharma_Ketan_Resume.pdf",
+  resumeFileName: "Sharma_Ketan_Resume.pdf",
 
   // ── Site ─────────────────────────────────────────────────────────────────
   site: {

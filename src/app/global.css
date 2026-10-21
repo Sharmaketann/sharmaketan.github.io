@@ -172,3 +172,12 @@ table {
 [data-rehype-pretty-code-title] + pre {
   @apply mt-0 rounded-t-none border-t-0;
 }
+
+/* Horizontal nav track on narrow screens: still scrollable, no visible bar. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

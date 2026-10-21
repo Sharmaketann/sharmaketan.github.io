@@ -12,6 +12,7 @@ const NAV = [
   { path: "/book-journey", name: "Journey"  },
   { path: "/blog",         name: "Blog"     },
   { path: "/projects",     name: "Projects" },
+  { path: "/backtest",     name: "Backtest" },
   { path: "/api-docs",     name: "API"      },
 ];
 
@@ -21,7 +22,10 @@ export function Header() {
 
   return (
     <header className="py-6 mb-8 border-b border-gray-100 dark:border-zinc-800">
-      <nav className="flex items-center justify-between">
+      <nav className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+
+        {/* On small screens the logo and the toggle share the top row. */}
+        <div className="flex items-center justify-between sm:contents">
 
         {/* ── Logo / site name ─────────────────────────────────── */}
         <Link href="/" aria-label="Home" className="inline-block shrink-0">
@@ -35,16 +39,26 @@ export function Header() {
           />
         </Link>
 
+        {/* The session clock has no room on a phone; it reappears at lg. */}
+        <div className="flex items-center gap-3 sm:order-3">
+          <span className="hidden lg:inline-flex">
+            <MarketStatusPill />
+          </span>
+          <ThemeToggler />
+        </div>
+        </div>
+
         {/* ── Nav links ────────────────────────────────────────── */}
-        <ul className="flex items-center gap-4 sm:gap-7">
+        {/* Scrollable on narrow screens so a seventh item never breaks it. */}
+        <ul className="flex items-center gap-5 sm:gap-6 md:gap-7 overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 sm:order-2">
           {NAV.map(({ path, name }) => {
             const active = path === "/" ? pathname === "/" : pathname.startsWith(path);
             return (
-              <li key={path}>
+              <li key={path} className="shrink-0">
                 <Link
                   href={path}
                   className={cn(
-                    "relative text-sm pb-0.5 transition-colors",
+                    "relative text-sm pb-0.5 transition-colors whitespace-nowrap",
                     active
                       ? "text-gray-900 dark:text-gray-100 font-medium"
                       : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
@@ -63,13 +77,6 @@ export function Header() {
           })}
         </ul>
 
-        {/* ── Session clock + theme toggle ─────────────────────── */}
-        <div className="flex items-center gap-3">
-          <span className="hidden lg:inline-flex">
-            <MarketStatusPill />
-          </span>
-          <ThemeToggler />
-        </div>
       </nav>
     </header>
   );

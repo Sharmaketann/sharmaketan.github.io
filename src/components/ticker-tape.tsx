@@ -149,13 +149,13 @@ export function TickerTape() {
       </div>
 
       <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white dark:from-zinc-950 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-white dark:from-zinc-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-28 bg-gradient-to-l from-white via-white/95 dark:from-zinc-950 dark:via-zinc-950/95 to-transparent" />
 
       <a
         href="/api/v1/quotes"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 font-mono text-[8px] uppercase tracking-[0.12em] hover:opacity-70 transition-opacity"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.12em] bg-white dark:bg-zinc-950 hover:opacity-70 transition-opacity"
         style={{ color: badge.colour }}
         title="Delayed quotes from my own API — click to see the raw JSON"
       >

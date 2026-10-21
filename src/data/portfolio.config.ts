@@ -66,6 +66,7 @@ export const PORTFOLIO_CONFIG = {
     { path: "/", name: "Home" },
     { path: "/blog", name: "Blog" },
     { path: "/projects", name: "Projects" },
+    { path: "/backtest", name: "Backtest" },
     { path: "/api-docs", name: "API" },
   ] as const,
 } as const;

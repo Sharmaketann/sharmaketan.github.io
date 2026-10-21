@@ -80,11 +80,11 @@ const stages = [
     description:
       "Moved from insurance into capital markets. Building the backend behind an AI-driven quant and algo trading terminal — market data, backtesting and live execution in one platform.",
     achievements: [
-      "Building backend services for a unified trading and strategy terminal",
-      "Working across market data, strategy backtesting and order execution",
-      "Supporting registered investment advisors, wealth managers and quant desks",
+      "Building the market-data path - real-time ingestion and WebSocket streaming",
+      "Working on the backtesting and strategy engine over historical market data",
+      "Backing analytics and charting with a ClickHouse time-series store",
     ],
-    tags: ["Node.js", "TypeScript", "PostgreSQL", "REST API", "AWS"],
+    tags: ["TypeScript", "Node.js", "Python", "MongoDB", "Redis", "ClickHouse"],
   },
 ];
 

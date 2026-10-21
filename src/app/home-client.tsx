@@ -22,7 +22,7 @@ const fadeUp = (delay = 0) => ({
 // ── What I focus on ──────────────────────────────────────────────────────────
 
 const FOCUS = [
-  "Backend systems & distributed service architecture",
+  "Real-time data pipelines & backend services",
   "API design, integration & data pipelines",
   "Trading infrastructure, fintech & insurance technology",
 ];
@@ -43,8 +43,8 @@ const STATS = [
 const CURRENT = {
   company: "Wizzer AdvisorTech",
   url: "https://wizzer.in/",
-  what: "Backend for an AI quant & algo trading terminal — market data, backtesting and live execution.",
-  stack: ["Node.js", "TypeScript", "PostgreSQL", "AWS"],
+  what: "Market-data streaming and the backtesting engine behind an AI quant & algo trading terminal.",
+  stack: ["TypeScript", "Python", "ClickHouse", "Redis"],
 };
 
 // ── Structured data ───────────────────────────────────────────────────────────

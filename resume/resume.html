@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharma Ketan Umesh — Senior Backend Developer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+  /*
+   * Source for public/Sharma_Ketan_Resume.pdf.
+   * Regenerate with:  node scripts/build-resume.mjs
+   *
+   * ATS notes - both of these look identical on screen but break parsers,
+   * so do not "tidy" them back:
+   *  1. ul.pts uses a hanging indent, NOT position:relative. Positioned
+   *     elements paint in a later pass, which dumps every bullet at the end
+   *     of the PDF text layer, detached from its employer.
+   *  2. Section headings keep letter-spacing low. Chrome writes real space
+   *     characters for wide tracking, turning EXPERIENCE into
+   *     "E X P E R I E N C E" and defeating ATS section detection.
+   * Date ranges use ASCII hyphens for the same reason.
+   */
+
+  :root{
+    --paper:#ffffff;
+    --ink:#14181f;
+    --ink-soft:#3f4754;
+    --muted:#79828f;
+    --rule:#dde2e8;
+    --rule-strong:#b9c2cb;
+    --accent:#0f5c4a;
+  }
+
+  *{box-sizing:border-box}
+
+  @page{ size:A4; margin:0 }
+
+  html,body{background:var(--paper)}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .sheet{
+    width:210mm;
+    min-height:297mm;
+    margin:0 auto;
+    background:var(--paper);
+    padding:11mm 13mm 10mm;
+  }
+
+  .name{
+    font-family:"IBM Plex Serif",Georgia,serif;
+    font-weight:600;font-size:27px;line-height:1.05;letter-spacing:-.015em;
+    margin:0;color:var(--ink);
+  }
+  .role{margin:4px 0 0;font-size:12px;font-weight:500;color:var(--accent);letter-spacing:.01em}
+  .contact{
+    margin:8px 0 0;padding-top:8px;border-top:1.5px solid var(--rule-strong);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:9px;line-height:1.65;color:var(--ink-soft);
+    display:flex;flex-wrap:wrap;gap:1px 9px;
+  }
+  .contact a{color:var(--ink-soft);text-decoration:none}
+  .sep{color:var(--rule-strong)}
+
+  section{margin-top:11px}
+  .sec-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .sec-head h2{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--accent);margin:0;white-space:nowrap;
+  }
+  .sec-head::after{content:"";flex:1;height:1px;background:var(--rule)}
+
+  .summary{margin:0;font-size:10.4px;line-height:1.55;color:var(--ink-soft)}
+  .summary strong{color:var(--ink);font-weight:600}
+
+  .jobs{display:flex;flex-direction:column;gap:9px}
+  .job{break-inside:avoid}
+  .job-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .job-title{margin:0;font-size:11.8px;font-weight:600;color:var(--ink);line-height:1.25}
+  .job-title .co{font-weight:500;color:var(--ink-soft)}
+  .job-when{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:9px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+  .job-where{font-size:9.4px;color:var(--muted);margin:1px 0 4px}
+
+  ul.pts{margin:0;padding:0;list-style:none}
+  ul.pts li{
+    padding-left:12px;text-indent:-12px;margin-bottom:2px;
+    font-size:10.2px;line-height:1.45;color:var(--ink-soft);
+  }
+  ul.pts li::before{
+    content:"\2013";margin-right:6px;color:var(--rule-strong);
+  }
+  ul.pts li strong{color:var(--ink);font-weight:600}
+  .stack{
+    margin:4px 0 0;padding-left:12px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:8.6px;line-height:1.45;color:var(--muted);
+  }
+  .stack b{color:var(--ink-soft);font-weight:500}
+
+  .skills{display:grid;grid-template-columns:auto 1fr;gap:3px 13px;font-size:10.2px;line-height:1.45}
+  .skills dt{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:8.6px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);padding-top:1.5px;white-space:nowrap;
+  }
+  .skills dd{margin:0;color:var(--ink-soft)}
+
+  .rows{display:flex;flex-direction:column;gap:5px}
+  .row{break-inside:avoid}
+  .row-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .row-title{margin:0;font-size:10.4px;font-weight:600;color:var(--ink);line-height:1.3}
+  .row-title a{color:var(--ink);text-decoration:none}
+  .row-meta{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:8.6px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+  .row-desc{margin:1px 0 0;font-size:9.8px;line-height:1.45;color:var(--ink-soft)}
+  .row-desc strong{color:var(--ink);font-weight:600}
+  .tech{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:8.4px;color:var(--muted)}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <header>
+    <h1 class="name">Sharma Ketan Umesh</h1>
+    <p class="role">Senior Backend Developer &middot; Full-Stack Engineer</p>
+    <div class="contact">
+      <span>Mumbai, India</span><span class="sep">/</span>
+      <a href="tel:+919175190931">+91 91751 90931</a><span class="sep">/</span>
+      <a href="mailto:sharmaketann@gmail.com">sharmaketann@gmail.com</a><span class="sep">/</span>
+      <a href="https://sharmaketann.in">sharmaketann.in</a><span class="sep">/</span>
+      <a href="https://www.linkedin.com/in/sharmaketann/">linkedin.com/in/sharmaketann</a><span class="sep">/</span>
+      <a href="https://github.com/Sharmaketann">github.com/Sharmaketann</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head"><h2>Profile</h2></div>
+    <p class="summary">Backend engineer with <strong>4+ years</strong> building regulated financial and insurance products in Mumbai. Led the team behind an insurance Point of Sale platform and integrated <strong>200+ carrier APIs</strong> across 13+ providers; now building market-data and backtesting infrastructure for an AI quant trading terminal. Strongest in <strong>TypeScript and Node.js services, real-time data pipelines, API integration and database design</strong>.</p>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Experience</h2></div>
+    <div class="jobs">
+
+      <article class="job">
+        <div class="job-top">
+          <h3 class="job-title">Senior Backend Developer <span class="co">&middot; Wizzer AdvisorTech Pvt. Ltd.</span></h3>
+          <span class="job-when">Jan 2026 - Present</span>
+        </div>
+        <p class="job-where">Mumbai, India &middot; WealthTech &mdash; AI quant &amp; algo trading terminal for registered investment advisors</p>
+        <ul class="pts">
+          <li>Build the <strong>market-data path</strong> for an AI quant and algo trading terminal &mdash; real-time ingestion and WebSocket streaming into a ClickHouse time-series store backing analytics and charting.</li>
+          <li>Work on the <strong>backtesting and strategy engine</strong>, running advisor and quant-desk strategies against historical market data on an NSE/BSE-approved platform.</li>
+          <li>Build backend services in TypeScript and Python across the data path, with MongoDB for persistence and Redis for caching and hot-path reads.</li>
+        </ul>
+        <p class="stack"><b>Stack:</b> TypeScript &middot; Node.js &middot; Python &middot; MongoDB &middot; Redis &middot; ClickHouse &middot; WebSocket</p>
+      </article>
+
+      <article class="job">
+        <div class="job-top">
+          <h3 class="job-title">Full Stack Lead Developer <span class="co">&middot; Insure Efficient</span></h3>
+          <span class="job-when">Nov 2023 - Dec 2025</span>
+        </div>
+        <p class="job-where">Mumbai, India &middot; Insurance technology</p>
+        <ul class="pts">
+          <li>Led the team that designed and shipped a scalable <strong>Point of Sale portal</strong> for Efficient Insurance Brokers, streamlining agent workflows and lifting user engagement <strong>20%</strong>.</li>
+          <li>Integrated <strong>200+ APIs across 13+ insurance carriers</strong> into a single quote-and-issue flow, standardising inconsistent partner contracts behind one internal interface.</li>
+          <li>Owned security and data integrity for backend systems, hardening services against common vulnerabilities and protecting policyholder data.</li>
+          <li>Partnered with the Risk team on a suite of interconnected web applications, and with DevOps to keep backend services deploying cleanly on AWS EC2.</li>
+          <li>Received an internal award for performance and contribution on the new POS portal.</li>
+        </ul>
+        <p class="stack"><b>Stack:</b> Node.js &middot; React &middot; Redux &middot; Express &middot; TailwindCSS &middot; MySQL &middot; AWS EC2 &middot; REST APIs</p>
+      </article>
+
+      <article class="job">
+        <div class="job-top">
+          <h3 class="job-title">Full Stack Developer <span class="co">&middot; Sapio Analytics</span></h3>
+          <span class="job-when">Sep 2022 - Oct 2023</span>
+        </div>
+        <p class="job-where">Mumbai, India &middot; Data &amp; governance analytics</p>
+        <ul class="pts">
+          <li>Built full-stack features across client analytics products, refactoring existing codebases for performance, scalability and maintainability.</li>
+          <li>Integrated third-party APIs and external data sources, unifying fragmented feeds into consistent application data.</li>
+          <li>Led a small development team and mentored junior developers &mdash; scoping, delegation, code review and release quality.</li>
+        </ul>
+        <p class="stack"><b>Stack:</b> React &middot; Node.js &middot; Express &middot; REST APIs &middot; MySQL &middot; MongoDB</p>
+      </article>
+
+      <article class="job">
+        <div class="job-top">
+          <h3 class="job-title">.NET Developer Intern <span class="co">&middot; Ushyaku Software Solution</span></h3>
+          <span class="job-when">Jul 2021 - Oct 2021</span>
+        </div>
+        <p class="job-where">Remote</p>
+        <ul class="pts">
+          <li>Rebuilt legacy ASP.NET interfaces, developed MS SQL tables, stored procedures and functions, and produced SSRS reporting with query tracing in SQL Profiler.</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Technical Skills</h2></div>
+    <dl class="skills">
+      <dt>Languages</dt><dd>TypeScript, JavaScript (ES6+), Python, SQL, C#</dd>
+      <dt>Backend</dt><dd>Node.js, Express, NestJS, Elysia.js, REST API design, WebSocket, JWT authentication</dd>
+      <dt>Frontend</dt><dd>React, Next.js, Redux Toolkit, TailwindCSS, Recharts</dd>
+      <dt>Databases</dt><dd>MongoDB, PostgreSQL, MySQL, Redis, ClickHouse, MS SQL Server</dd>
+      <dt>Cloud &amp; Tools</dt><dd>AWS (EC2, Amplify), Firebase, Git &amp; GitHub, Postman, Jest, SendGrid</dd>
+      <dt>Practice</dt><dd>Agile SDLC, code review, technical mentoring, stakeholder management</dd>
+    </dl>
+  </section>
+
+  <div class="twocol">
+    <section>
+      <div class="sec-head"><h2>Selected Projects</h2></div>
+      <div class="rows">
+        <div class="row">
+          <p class="row-title"><a href="https://gingerfreshens.web.app/">Ginger Fresh</a></p>
+          <p class="row-desc">MERN grocery commerce platform with PayPal checkout, JWT auth and bcrypt-secured accounts.
+            <span class="tech">React &middot; Node &middot; Express &middot; MongoDB</span></p>
+        </div>
+        <div class="row">
+          <p class="row-title"><a href="https://christ-news-aa213.web.app/">Christ News</a></p>
+          <p class="row-desc">Real-time college news platform with live updates pushed over WebSockets.
+            <span class="tech">TypeScript &middot; React &middot; Node &middot; Socket.IO</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Technical Writing</h2></div>
+      <div class="rows">
+        <div class="row">
+          <div class="row-top">
+            <p class="row-title">Visualising Algo Trade Performance</p>
+            <span class="row-meta">Feb 2026</span>
+          </div>
+          <p class="row-desc">Equity curve and trade distribution charts in React and Recharts.</p>
+        </div>
+        <div class="row">
+          <div class="row-top">
+            <p class="row-title">Uniform Responses in Elysia.js</p>
+            <span class="row-meta">Jul 2024</span>
+          </div>
+          <p class="row-desc">Middleware for consistent success and error contracts across an API.</p>
+        </div>
+        <div class="row">
+          <div class="row-top">
+            <p class="row-title">Email Service in NestJS</p>
+            <span class="row-meta">Jun 2024</span>
+          </div>
+          <p class="row-desc">Transactional email with MJML, Handlebars and SendGrid.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="twocol">
+    <section>
+      <div class="sec-head"><h2>Education</h2></div>
+      <div class="row">
+        <div class="row-top">
+          <p class="row-title">BBA, Computer Application</p>
+          <span class="row-meta">2018 - 2021</span>
+        </div>
+        <p class="row-desc">Christ College, Pune University &middot; 7.38 CGPA</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Certifications</h2></div>
+      <div class="rows">
+        <p class="row-desc" style="margin:0"><strong>MongoDB University</strong> &mdash; MongoDB Basics &middot; Crafting Conference Abstract</p>
+        <p class="row-desc" style="margin:0"><strong>DataCamp</strong> &mdash; Intermediate SQL &middot; Joining Data in SQL</p>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+</body>
+</html>

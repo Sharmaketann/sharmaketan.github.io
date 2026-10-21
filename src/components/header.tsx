@@ -12,6 +12,7 @@ const NAV = [
   { path: "/book-journey", name: "Journey"  },
   { path: "/blog",         name: "Blog"     },
   { path: "/projects",     name: "Projects" },
+  { path: "/api-docs",     name: "API"      },
 ];
 
 export function Header() {

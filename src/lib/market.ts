@@ -74,13 +74,18 @@ export function getMarketStatus(
     };
   }
 
+  // MCX has no pre-open call — its preOpen and open are the same minute — so
+  // the label has to say "opens" there rather than announcing a session that
+  // does not exist on that exchange.
+  const firstBellVerb = s.preOpen === s.open ? "opens" : "pre-open";
+
   if (minuteOfDay < s.preOpen) {
     return {
       state: "CLOSED",
       segment,
       istTime,
       minutesToChange: s.preOpen - minuteOfDay,
-      nextLabel: phrase(s.preOpen - minuteOfDay, "pre-open"),
+      nextLabel: phrase(s.preOpen - minuteOfDay, firstBellVerb),
     };
   }
 
@@ -113,7 +118,7 @@ export function getMarketStatus(
     segment,
     istTime,
     minutesToChange: toNext,
-    nextLabel: weekday === 5 ? "opens Monday" : phrase(toNext, "opens"),
+    nextLabel: weekday === 5 ? "opens Monday" : phrase(toNext, firstBellVerb),
   };
 }
 

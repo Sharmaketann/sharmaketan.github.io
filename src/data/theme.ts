@@ -27,37 +27,3 @@ export const THEME = {
   /** Grid lines on charts and ladders. */
   grid: "rgba(148, 163, 184, 0.14)",
 } as const;
-
-/** The instruments the work actually touches: index futures, equity, commodities. */
-export type Segment = "INDEX" | "EQUITY" | "COMMODITY";
-
-export interface Instrument {
-  symbol: string;
-  name: string;
-  segment: Segment;
-  /** Indicative level, only used to seed the generated tape. Not live data. */
-  seed: number;
-  /** Typical tick movement, to keep generated ticks plausible per instrument. */
-  tick: number;
-}
-
-/**
- * The tape is generated client-side from these seeds — it is explicitly NOT a
- * live market feed, and is labelled as simulated wherever it appears. Quoting
- * real prices would mean either a paid feed or stale numbers pretending to be
- * fresh, and a portfolio has no business implying either.
- */
-export const INSTRUMENTS: Instrument[] = [
-  { symbol: "NIFTY",     name: "Nifty 50 Fut",      segment: "INDEX",     seed: 26120,  tick: 18 },
-  { symbol: "BANKNIFTY", name: "Bank Nifty Fut",    segment: "INDEX",     seed: 58340,  tick: 42 },
-  { symbol: "FINNIFTY",  name: "Fin Nifty Fut",     segment: "INDEX",     seed: 27480,  tick: 22 },
-  { symbol: "RELIANCE",  name: "Reliance Inds",     segment: "EQUITY",    seed: 1486,   tick: 3.2 },
-  { symbol: "HDFCBANK",  name: "HDFC Bank",         segment: "EQUITY",    seed: 1742,   tick: 3.6 },
-  { symbol: "INFY",      name: "Infosys",           segment: "EQUITY",    seed: 1934,   tick: 4.1 },
-  { symbol: "TATASTEEL", name: "Tata Steel",        segment: "EQUITY",    seed: 178,    tick: 0.7 },
-  { symbol: "GOLD",      name: "Gold Fut",          segment: "COMMODITY", seed: 78420,  tick: 64 },
-  { symbol: "SILVER",    name: "Silver Fut",        segment: "COMMODITY", seed: 94150,  tick: 128 },
-  { symbol: "CRUDEOIL",  name: "Crude Oil Fut",     segment: "COMMODITY", seed: 5612,   tick: 11 },
-  { symbol: "NATURALGAS",name: "Natural Gas Fut",   segment: "COMMODITY", seed: 243,    tick: 1.4 },
-  { symbol: "COPPER",    name: "Copper Fut",        segment: "COMMODITY", seed: 854,    tick: 2.1 },
-];

@@ -10,6 +10,8 @@ import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ResumeModal } from "@/components/resume-modal";
+import { CareerCurve } from "@/components/career-curve";
+import { MarketStatusPill } from "@/components/market-status";
 
 // ── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -110,7 +112,7 @@ export default function Home() {
             <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-6">
               <span
                 className="h-1.5 w-1.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: "#b86440" }}
+                style={{ backgroundColor: "#c08a3e" }}
               />
               <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
                 Senior Backend Developer
@@ -123,7 +125,7 @@ export default function Home() {
                 {...fadeUp(0.08)}
                 className="text-[clamp(2.25rem,5vw,3.25rem)] font-bold tracking-tight text-gray-900 dark:text-gray-100 select-none"
               >
-                SHARMA <span style={{ color: "#b86440" }}>KETAN</span>
+                SHARMA <span style={{ color: "#c08a3e" }}>KETAN</span>
               </motion.h1>
 
               {/* Terracotta rule */}
@@ -131,7 +133,7 @@ export default function Home() {
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.48, delay: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ transformOrigin: "left", backgroundColor: "#b86440", height: "2px" }}
+                style={{ transformOrigin: "left", backgroundColor: "#c08a3e", height: "2px" }}
                 className="mt-3.5 w-full max-w-sm"
               />
             </div>
@@ -214,8 +216,8 @@ export default function Home() {
                 className="ml-1 text-xs tracking-wide px-4 py-2 rounded-lg border transition-colors duration-200
                            border-gray-300 dark:border-gray-700
                            text-gray-700 dark:text-gray-300
-                           hover:border-[#b86440] hover:text-[#b86440]
-                           dark:hover:border-[#b86440] dark:hover:text-[#b86440]"
+                           hover:border-[#c08a3e] hover:text-[#c08a3e]
+                           dark:hover:border-[#c08a3e] dark:hover:text-[#c08a3e]"
               >
                 Resume&nbsp;→
               </button>
@@ -243,11 +245,11 @@ export default function Home() {
               <span className="relative flex h-2 w-2">
                 <span
                   className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: "#b86440" }}
+                  style={{ backgroundColor: "#c08a3e" }}
                 />
                 <span
                   className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: "#b86440" }}
+                  style={{ backgroundColor: "#c08a3e" }}
                 />
               </span>
               <span className="text-[11px] text-gray-500 dark:text-gray-400 tracking-wide whitespace-nowrap">
@@ -273,12 +275,12 @@ export default function Home() {
                   <polyline
                     points="1,26.8 6.1,25.8 11.3,26.3 16.4,24.6 21.5,23.4 26.7,24.2 31.8,22.2 36.9,21 42,21.8 47.2,19.8 52.3,18.2 57.4,18.9 62.6,17.2 67.7,15.5 72.8,16.2 77.9,14.1 83.1,12.9 88.2,13.6 93.3,11.4 98.5,9.8 103.6,8.3 108.7,9 113.8,6.9 119,5.2"
                     fill="none"
-                    stroke="#b86440"
+                    stroke="#c08a3e"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-                  <circle cx="119" cy="5.2" r="2.2" fill="#b86440" />
+                  <circle cx="119" cy="5.2" r="2.2" fill="#c08a3e" />
                 </svg>
               </div>
 
@@ -286,7 +288,7 @@ export default function Home() {
                 href={CURRENT.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
+                className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-[#c08a3e] dark:hover:text-[#c08a3e] transition-colors"
               >
                 {CURRENT.company} &#8599;
               </a>
@@ -308,6 +310,25 @@ export default function Home() {
             </motion.div>
           </motion.div>
         </div>
+
+        {/* ── Career plotted as an equity curve ── */}
+        <motion.div
+          {...fadeUp(0.56)}
+          className="mt-12 pt-6 border-t border-gray-100 dark:border-zinc-800"
+        >
+          <div className="flex items-baseline justify-between gap-3 mb-2 flex-wrap">
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "#c08a3e" }}
+            >
+              Career curve
+            </span>
+            <span className="font-mono text-[9.5px] text-gray-400 dark:text-gray-600">
+              Jul 2021 &rarr; today &middot; flat leg is the gap, not a rendering bug
+            </span>
+          </div>
+          <CareerCurve />
+        </motion.div>
 
         {/* ── Tech stack strip ── */}
         <motion.div
@@ -338,7 +359,7 @@ export default function Home() {
               <div className="flex items-center gap-2 mb-2">
                 <span
                   className="h-1.5 w-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: "#b86440" }}
+                  style={{ backgroundColor: "#c08a3e" }}
                 />
                 <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
                   Writing
@@ -350,7 +371,7 @@ export default function Home() {
             </div>
             <Link
               href="/blog"
-              className="text-xs text-gray-400 dark:text-gray-500 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors tracking-wide"
+              className="text-xs text-gray-400 dark:text-gray-500 hover:text-[#c08a3e] dark:hover:text-[#c08a3e] transition-colors tracking-wide"
             >
               All posts →
             </Link>

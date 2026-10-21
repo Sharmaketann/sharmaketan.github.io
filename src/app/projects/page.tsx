@@ -17,7 +17,7 @@ export default function Projects() {
           <div className="flex items-center gap-2 mb-3">
             <span
               className="h-1.5 w-1.5 rounded-full shrink-0"
-              style={{ backgroundColor: "#b86440" }}
+              style={{ backgroundColor: "#c08a3e" }}
             />
             <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
               Work

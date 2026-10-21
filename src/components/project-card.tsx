@@ -33,7 +33,7 @@ export const ProjectCard = ({ project }: Props) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Source code"
-            className="text-gray-400 dark:text-gray-500 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-[#c08a3e] dark:hover:text-[#c08a3e] transition-colors"
           >
             <GitHubIcon className="h-4 w-4" />
           </Link>
@@ -42,7 +42,7 @@ export const ProjectCard = ({ project }: Props) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Live site"
-            className="text-gray-400 dark:text-gray-500 hover:text-[#b86440] dark:hover:text-[#b86440] transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-[#c08a3e] dark:hover:text-[#c08a3e] transition-colors"
           >
             <LinkIcon className="h-4 w-4" />
           </Link>

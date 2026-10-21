@@ -27,7 +27,7 @@ export default function Blog() {
         <div className="flex items-center gap-2 mb-3">
           <span
             className="h-1.5 w-1.5 rounded-full shrink-0"
-            style={{ backgroundColor: "#b86440" }}
+            style={{ backgroundColor: "#c08a3e" }}
           />
           <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
             Writing
@@ -42,7 +42,7 @@ export default function Blog() {
             title="RSS Feed"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 hover:text-[#b86440] transition-colors"
+            className="text-gray-400 hover:text-[#c08a3e] transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

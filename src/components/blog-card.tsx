@@ -21,7 +21,7 @@ export function BlogCard({ blog }: { blog: BlogCardProps }) {
           {blog.readingTime.text}
         </span>
       </div>
-      <h3 className="text-base font-semibold leading-snug tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-[#b86440] transition-colors mb-1">
+      <h3 className="text-base font-semibold leading-snug tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-[#c08a3e] transition-colors mb-1">
         {blog.title}
       </h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">

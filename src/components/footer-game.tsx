@@ -146,7 +146,7 @@ const DARK_C: Colors = {
   faceBorder:  "#cfc4b5",
   symDark:     "#1e1308",
   symBack:     "#2e2b24",
-  terracotta:  "#b86440",
+  terracotta:  "#c08a3e",
   textPrimary: "#e0d8cc",
   textMuted:   "#6e6458",
 };
@@ -159,7 +159,7 @@ const LIGHT_C: Colors = {
   faceBorder:  "#e0d8cc",
   symDark:     "#1e1308",
   symBack:     "#9e9080",
-  terracotta:  "#b86440",
+  terracotta:  "#c08a3e",
   textPrimary: "#1e1308",
   textMuted:   "#7a6e60",
 };
@@ -241,7 +241,7 @@ function MemoryCard({ card, onClick, C }: { card: Card; onClick: () => void; C: 
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function FooterGame() {
+export function FooterGame({ embedded = false }: { embedded?: boolean } = {}) {
   const { resolvedTheme } = useTheme();
   const C: Colors = resolvedTheme === "light" ? LIGHT_C : DARK_C;
 
@@ -314,23 +314,24 @@ export function FooterGame() {
 
   return (
     <section
-      style={{ backgroundColor: C.bg }}
-      className="w-full py-14 px-6 mt-10"
+      style={embedded ? undefined : { backgroundColor: C.bg }}
+      className={embedded ? "w-full" : "w-full py-14 px-6 mt-10"}
     >
-      <div className="max-w-3xl mx-auto">
-        {/* Title */}
-        <h2
-          className="text-center mb-8"
-          style={{
-            color: C.textPrimary,
-            fontFamily: "'Georgia', 'Times New Roman', serif",
-            fontSize: "clamp(1.1rem, 3vw, 1.6rem)",
-            fontWeight: 400,
-            letterSpacing: "0.01em",
-          }}
-        >
-          Welcome to the footer arcade
-        </h2>
+      <div className={embedded ? "" : "max-w-3xl mx-auto"}>
+        {!embedded && (
+          <h2
+            className="text-center mb-8"
+            style={{
+              color: C.textPrimary,
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              fontSize: "clamp(1.1rem, 3vw, 1.6rem)",
+              fontWeight: 400,
+              letterSpacing: "0.01em",
+            }}
+          >
+            Welcome to the footer arcade
+          </h2>
+        )}
 
         {/* Controls row */}
         <div className="flex justify-between items-center mb-5">

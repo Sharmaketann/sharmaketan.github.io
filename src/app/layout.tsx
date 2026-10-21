@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
+import { TickerTape } from "@/components/ticker-tape";
 import { Footer } from "@/components/footer";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Space_Grotesk } from "next/font/google";
@@ -145,8 +146,8 @@ export default function RootLayout({
                     className="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-lg border transition-colors duration-200
                                border-gray-200 dark:border-zinc-700
                                text-gray-700 dark:text-gray-300
-                               hover:border-[#b86440] hover:text-[#b86440]
-                               dark:hover:border-[#b86440] dark:hover:text-[#b86440]"
+                               hover:border-[#c08a3e] hover:text-[#c08a3e]
+                               dark:hover:border-[#c08a3e] dark:hover:text-[#c08a3e]"
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -163,6 +164,9 @@ export default function RootLayout({
             </main>
           ) : (
             <main className="mx-4 px-2 md:px-0 lg:mx-auto flex flex-col justify-between min-h-screen">
+              <div className="-mx-4 md:mx-0">
+                <TickerTape />
+              </div>
               <Header />
               {children}
               <SpeedInsights />

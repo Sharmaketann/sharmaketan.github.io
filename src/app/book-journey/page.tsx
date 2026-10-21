@@ -39,7 +39,7 @@ const stages = [
   },
   {
     id: 3,
-    period: "Sept 2022 – Oct 2023",
+    period: "Sep 2022 – Oct 2023",
     location: "Sapio Analytics · Mumbai",
     title: "Full Stack Developer",
     icon: "🚀",
@@ -107,7 +107,7 @@ export default function BookJourney() {
         <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-3">
           <span
             className="h-1.5 w-1.5 rounded-full shrink-0"
-            style={{ backgroundColor: "#b86440" }}
+            style={{ backgroundColor: "#c08a3e" }}
           />
           <span className="text-xs tracking-[0.22em] uppercase text-gray-500 dark:text-gray-400">
             Journey
@@ -144,7 +144,7 @@ export default function BookJourney() {
               <div className="relative shrink-0 mt-1">
                 <div
                   className="w-[23px] h-[23px] rounded-full border-2 flex items-center justify-center text-[10px] bg-white dark:bg-zinc-950"
-                  style={{ borderColor: "#b86440" }}
+                  style={{ borderColor: "#c08a3e" }}
                 >
                   {stage.icon}
                 </div>
@@ -156,7 +156,7 @@ export default function BookJourney() {
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
                   <span
                     className="text-xs font-mono tabular-nums"
-                    style={{ color: "#b86440" }}
+                    style={{ color: "#c08a3e" }}
                   >
                     {stage.period}
                   </span>
@@ -187,7 +187,7 @@ export default function BookJourney() {
                     >
                       <span
                         className="mt-[5px] h-1 w-1 rounded-full shrink-0"
-                        style={{ backgroundColor: "#b86440" }}
+                        style={{ backgroundColor: "#c08a3e" }}
                       />
                       {a}
                     </li>

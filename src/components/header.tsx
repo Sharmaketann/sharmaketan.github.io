@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggler } from "./theme-toggle";
+import { MarketStatusPill } from "./market-status";
 
 const NAV = [
   { path: "/",             name: "Home"     },
@@ -52,7 +53,7 @@ export function Header() {
                   {active && (
                     <span
                       className="absolute -bottom-[1px] left-0 w-full h-px"
-                      style={{ backgroundColor: "#b86440" }}
+                      style={{ backgroundColor: "#c08a3e" }}
                     />
                   )}
                 </Link>
@@ -61,8 +62,13 @@ export function Header() {
           })}
         </ul>
 
-        {/* ── Theme toggle ─────────────────────────────────────── */}
-        <ThemeToggler />
+        {/* ── Session clock + theme toggle ─────────────────────── */}
+        <div className="flex items-center gap-3">
+          <span className="hidden lg:inline-flex">
+            <MarketStatusPill />
+          </span>
+          <ThemeToggler />
+        </div>
       </nav>
     </header>
   );

@@ -65,7 +65,7 @@ export function ResumeModal({ open, onClose }: ResumeModalProps) {
                 <div className="flex items-center gap-2">
                   <span
                     className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: "#b86440" }}
+                    style={{ backgroundColor: "#c08a3e" }}
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Resume — Sharma Ketan
@@ -80,8 +80,8 @@ export function ResumeModal({ open, onClose }: ResumeModalProps) {
                     className="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-lg border transition-colors duration-200
                                border-gray-200 dark:border-zinc-700
                                text-gray-700 dark:text-gray-300
-                               hover:border-[#b86440] hover:text-[#b86440]
-                               dark:hover:border-[#b86440] dark:hover:text-[#b86440]"
+                               hover:border-[#c08a3e] hover:text-[#c08a3e]
+                               dark:hover:border-[#c08a3e] dark:hover:text-[#c08a3e]"
                   >
                     <DownloadIcon />
                     Download PDF

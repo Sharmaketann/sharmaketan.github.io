@@ -14,7 +14,6 @@ import { siteMetadata } from "@/data/siteMetadata";
 import Head from "./head";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { ENV } from "@/lib/env";
-import { GoogleAdsense } from "@/components/google-adsense";
 import { headers } from "next/headers";
 import { ThemeToggler } from "@/components/theme-toggle";
 import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
@@ -179,7 +178,6 @@ export default function RootLayout({
           <TailwindIndicator />
         </ThemeProvider>
         <GoogleAnalytics gaId={ENV.GOOGLE_ANALYTICS_ID} />
-        <GoogleAdsense pId={ENV.ADSENSE_CLIENT_ID} />
       </body>
     </html>
   );

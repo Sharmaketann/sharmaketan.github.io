@@ -34,9 +34,14 @@ export default function Blog() {
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            All posts
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+              All posts
+            </h1>
+            <p className="font-mono text-[10px] text-gray-400 dark:text-gray-600 mt-1.5">
+              {undraftedBlogs.length} posts &middot; backend, APIs and the occasional chart
+            </p>
+          </div>
           <a
             href="/feed.xml"
             title="RSS Feed"

@@ -286,10 +286,23 @@ export default function BookJourney() {
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-3">
           Positions held
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md leading-relaxed">
+        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md leading-relaxed mb-5">
           The career as a trade blotter — every position taken, when it opened,
           when it closed, and how long it was held. One row is still open.
         </p>
+        <a
+          href="/Sharma_Ketan_Resume.pdf"
+          download="Sharma_Ketan_Resume.pdf"
+          className="inline-flex items-center gap-2 font-mono text-[11px] px-3.5 py-2 rounded-md border transition-colors hover:opacity-80"
+          style={{ color: THEME.accent, borderColor: THEME.accent }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download the one-pager
+        </a>
       </div>
 
       {/* ── Summary strip ── */}

@@ -9,21 +9,19 @@ export interface WebApp {
   demo?: string;
 }
 
-/** Shape for items in the TOOLS array. Reference this when adding new tools. */
-export interface Tool {
-  title: string;
-  description: string;
-  techs: readonly string[];
-  repo: string;
-  external: string;
-}
-
+/**
+ * Descriptions are written from the repos, not guessed from the deployed page.
+ * The previous copy hedged about work on this very account — "it likely serves
+ * as", "seems optimized", "depends on JavaScript being enabled" — which reads
+ * as scraped rather than written, and the tags claimed stacks the repos do not
+ * contain. Tags here match what is actually in each repository.
+ */
 export const WEB_APPS = [
   {
     title: "Ginger Fresh°",
-    tags: ["React", "Redux Toolkit", "Nodejs", "MongoDB", "ExpressJs"],
+    tags: ["React", "Redux Toolkit", "Node.js", "Express", "MongoDB", "PayPal"],
     description:
-      "Designed and developed a seamless e-commerce website using the MERN Stack, delivering exceptional user experiences. Integrated robust security measures, including PAYPAL, to ensure safe transactions. Leveraged essential libraries such as bcrypt, axios, and react-bootstrap, along with JWT authentication,",
+      "A full MERN e-commerce build — product catalogue, cart, checkout and order history. Payments run through PayPal, with JWT sessions and bcrypt-hashed credentials behind an Express API.",
     thumbnail: "/_static/projects/gingerfresh.png",
     repo: "https://github.com/Sharmaketann/Ginger",
     external: "https://gingerfreshens.web.app/",
@@ -34,18 +32,17 @@ export const WEB_APPS = [
     external: "https://master.d15fgioem7z8jk.amplifyapp.com/",
     thumbnail: "/_static/projects/college.png",
     description:
-      "Times of College, is a modern, responsive landing page. It likely serves as a platform for college-related content, integrating features like email sending through EmailJS. The design focuses on a clean and user-friendly interface built with tools such as React, JavaScript, and GSAP for smooth animations and interactions.",
-    tags: ["React", "Javascript", "Axios", "GSAP", "EmailJs"],
+      "A responsive landing page for college content, built in React with GSAP driving the scroll and entrance animations. Contact form posts through EmailJS, so there is no backend to run. Deployed on AWS Amplify.",
+    tags: ["React", "JavaScript", "GSAP", "EmailJS", "AWS Amplify"],
   },
   {
     title: "Netflix Clone°",
     repo: "https://github.com/Sharmaketann/NetFlix/",
     external: "https://net-flixx.web.app/",
-    demo: "",
     thumbnail: "/_static/projects/netflix.png",
     description:
-      "The website Net Flixx is a React-based application designed to showcase a streaming or media-related platform. It likely includes dynamic content and interactive elements, but the full functionality depends on JavaScript being enabled. The site seems optimized for delivering a seamless user experience with features like API integration and a modern UI framework.",
-    tags: ["Reactjs", "API", "MOVIEDB", "AXIOS"],
+      "A streaming-service front end built against the TMDB API — browse rows by genre, pull artwork and metadata per title, and play trailers inline. Written in React with Axios handling the API layer.",
+    tags: ["React", "TMDB API", "Axios", "Firebase Hosting"],
   },
   {
     title: "Christ News°",
@@ -53,8 +50,8 @@ export const WEB_APPS = [
     external: "https://christ-news-aa213.web.app/",
     thumbnail: "/_static/projects/christ.png",
     description:
-      "The Christ News website serves as a news and information platform for Christ College. It features updates on college activities, moral and spiritual guidance, and messages from the administration, such as the director's thoughts on education and leadership. The site also highlights testimonials from alumni, offering insights into the Christ College experience. Its design focuses on fostering a community built on the college's motto, Enlighten to Excel.",
-    tags: ["Typescript", "React", "Nodejs", "MongoDB", "Socket"],
+      "A news and information site for Christ College, Pune — activity updates, messages from the administration, alumni testimonials and a weather panel. Hand-built in HTML, SCSS and vanilla JavaScript with no framework, served from Firebase Hosting.",
+    tags: ["HTML", "SCSS", "JavaScript", "Firebase Hosting"],
   },
   {
     title: "Travel Bucket List°",
@@ -62,16 +59,17 @@ export const WEB_APPS = [
     external: "https://travel-bucket-list.netlify.app/",
     thumbnail: "/_static/projects/travel.png",
     description:
-      "The Travel Bucket List website is designed for users to create, organize, and track their travel goals. Built with modern technologies, it likely offers a user-friendly interface where users can add destinations to their list, mark places they've visited, and plan future trips. The platform is optimized for an engaging experience, though full functionality depends on JavaScript being enabled for interactive features.",
-    tags: ["Reactjs"],
+      "A React app for keeping a running list of places to go — add destinations, mark the ones already visited, and keep the rest in view. Small by design; the point was the state handling, not the feature count.",
+    tags: ["React", "JavaScript", "Netlify"],
   },
   {
     title: "Quotes°",
     repo: "https://github.com/Sharmaketann/Quote",
     external: "https://quotes-gist.netlify.app/",
     thumbnail: "/_static/projects/quote.png",
-    description: "Random quotes generator with twitter shareable button",
-    tags: ["Reactjs", "Express", "Github Gist", "Github"],
+    description:
+      "A random quote generator that reads its collection from a GitHub Gist rather than a database, so the content can be edited without a deploy. One click shares the current quote to Twitter.",
+    tags: ["React", "GitHub Gist", "Netlify"],
   },
   {
     title: "Breaking Bad°",
@@ -79,41 +77,7 @@ export const WEB_APPS = [
     external: "https://breakingbadly.netlify.app/breakingbad/showcase4-dark",
     thumbnail: "/_static/projects/breaking.png",
     description:
-      "Breaking Bad API showcasing the character profile upright using GSAP and horizontal scroll.",
-    tags: ["Javascript", "NextJs", "CSS", "SCSS", "Animation"],
-  },
-] as const;
-
-export const TOOLS = [
-  {
-    title: "states-nepal",
-    repo: "https://github.com/Sharmaketann/",
-    external: "https://github.com/Sharmaketann/",
-    description:
-      "npm package to get the dataset about different administrative division of Nepal.",
-    techs: ["npm-package"],
-  },
-  {
-    title: "aaja (आज)",
-    repo: "https://github.com/Sharmaketann/",
-    external: "https://github.com/Sharmaketann/",
-    description:
-      "Cli tool to get today's nepali date, tithi, public events and current time.",
-    techs: ["npm-package"],
-  },
-  {
-    title: "ApiHub",
-    repo: "https://github.com/Sharmaketann/",
-    external: "https://github.com/Sharmaketann/",
-    description:
-      "VS Code extension to get free third party api url on different categories.",
-    techs: ["vscode-extension"],
-  },
-  {
-    title: "shitcommits",
-    repo: "https://github.com/Sharmaketann/",
-    external: "https://github.com/Sharmaketann/",
-    description: "Cli tool to make git commits with not-so perfect messges.",
-    techs: ["npm-package"],
+      "A character showcase built on the Breaking Bad API, laid out as a horizontal scroll with GSAP handling the motion. Next.js, and mostly an excuse to spend time on animation timing.",
+    tags: ["Next.js", "GSAP", "SCSS", "Animation"],
   },
 ] as const;

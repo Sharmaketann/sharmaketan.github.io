@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 import { TickerTape } from "@/components/ticker-tape";
+import { SiteBackdrop } from "@/components/site-backdrop";
 import { Footer } from "@/components/footer";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Space_Grotesk } from "next/font/google";
@@ -92,10 +93,11 @@ export default function RootLayout({
       <Head />
       <body
         className={cn(
-          "mx-auto min-h-screen max-w-5xl antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
+          "mx-auto min-h-screen max-w-5xl overflow-x-clip antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
           space_grotesk.className,
         )}
       >
+        <SiteBackdrop />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -163,8 +165,8 @@ export default function RootLayout({
               <Analytics />
             </main>
           ) : (
-            <main className="mx-4 px-2 md:px-0 lg:mx-auto flex flex-col justify-between min-h-screen">
-              <div className="-mx-4 md:mx-0">
+            <main className="relative z-10 mx-4 px-2 md:px-0 lg:mx-auto flex flex-col justify-between min-h-screen">
+              <div className="relative left-1/2 -translate-x-1/2 w-screen">
                 <TickerTape />
               </div>
               <Header />

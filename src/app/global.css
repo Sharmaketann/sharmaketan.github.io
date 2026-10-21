@@ -3,14 +3,33 @@
 @tailwind utilities;
 
 @layer base {
+  /* The ticker breaks out of the content column with 100vw, which is wider
+     than the viewport by the scrollbar. Clip (not hidden) suppresses the
+     resulting horizontal scrollbar without turning html into a scroll
+     container, so position:sticky keeps working. Must be on html — clipping
+     only body still lets the document scroll sideways. */
+  html {
+    overflow-x: clip;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
+
+    /* Backdrop price grid. Kept very low contrast on purpose — it should read
+       as a surface, not as a pattern. See components/site-backdrop.tsx. */
+    --grid-line: rgba(15, 23, 42, 0.05);
+    --grid-accent: rgba(192, 138, 62, 0.16);
+    --backdrop-lift: rgba(192, 138, 62, 0.05);
   }
 
   .dark {
     --background: 224 71% 4%;
     --foreground: 213 31% 91%;
+
+    --grid-line: rgba(148, 163, 184, 0.055);
+    --grid-accent: rgba(192, 138, 62, 0.2);
+    --backdrop-lift: rgba(192, 138, 62, 0.07);
   }
 }
 

@@ -36,7 +36,7 @@ export function LanyardPass() {
         <Lanyard3D />
       </div>
       <p className="shrink-0 pt-1 lg:pb-6 text-center font-mono text-[8.5px] text-gray-400 dark:text-gray-600 pointer-events-none">
-        drag the pass
+        drag it &middot; click to turn it over
       </p>
     </div>
   );

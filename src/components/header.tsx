@@ -20,8 +20,10 @@ export function Header() {
   const rawPath   = usePathname() ?? "/";
   const pathname  = rawPath.startsWith("/blog/") ? "/blog" : rawPath;
 
+  // z-30 keeps the nav and session clock above the hanging pass, which is a
+  // fixed overlay at z-20. Chrome stays legible; the strap passes behind it.
   return (
-    <header className="py-6 mb-8 border-b border-gray-100 dark:border-zinc-800">
+    <header className="relative z-30 py-6 mb-8 border-b border-gray-100 dark:border-zinc-800">
       <nav className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 
         {/* On small screens the logo and the toggle share the top row. */}

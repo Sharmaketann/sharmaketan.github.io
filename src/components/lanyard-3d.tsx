@@ -244,7 +244,7 @@ export default function Lanyard3D() {
     renderer.domElement.style.display = "block";
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
-    renderer.domElement.style.cursor = "grab";
+    renderer.domElement.style.pointerEvents = "none";
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.1));
     const key = new THREE.DirectionalLight(0xffffff, 2.3);
@@ -322,52 +322,75 @@ export default function Lanyard3D() {
     scene.add(card);
 
     // ── Interaction ─────────────────────────────────────────────────────────
+    // The canvas hangs over the page, so it must never swallow clicks: it is
+    // pointer-events:none and the listeners live on window instead, picking
+    // the card by raycast. Anything that is not the card passes straight
+    // through to the links and buttons underneath.
     const ray = new THREE.Raycaster();
     const ptr = new THREE.Vector2();
     const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     const hit = new THREE.Vector3();
     let dragging = false;
+    let hovering = false;
 
-    const setPtr = (e: PointerEvent) => {
+    /** NDC for the canvas, or null when the pointer is outside it. */
+    const toNdc = (e: PointerEvent): boolean => {
       const r = renderer.domElement.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+        return false;
+      }
       ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
       ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      return true;
     };
-    const onDown = (e: PointerEvent) => {
-      if (reduce) return;
-      setPtr(e);
+
+    const overCard = (e: PointerEvent) => {
+      if (!toNdc(e)) return false;
       ray.setFromCamera(ptr, camera);
-      if (ray.intersectObject(card).length) {
-        dragging = true;
-        renderer.domElement.setPointerCapture(e.pointerId);
-        renderer.domElement.style.cursor = "grabbing";
-      }
+      return ray.intersectObject(card).length > 0;
     };
+
+    const setCursor = (v: boolean) => {
+      if (v === hovering) return;
+      hovering = v;
+      document.body.style.cursor = v ? "grab" : "";
+    };
+
+    const onDown = (e: PointerEvent) => {
+      if (reduce || !overCard(e)) return;
+      dragging = true;
+      document.body.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+    };
+
     const onMove = (e: PointerEvent) => {
-      if (!dragging) return;
-      setPtr(e);
+      if (!dragging) {
+        if (!reduce) setCursor(overCard(e));
+        return;
+      }
+      toNdc(e);
       ray.setFromCamera(ptr, camera);
       if (ray.ray.intersectPlane(dragPlane, hit)) {
         const last = pos[SEG - 1];
         last.set(hit.x, hit.y + CARD_H / 2, 0);
         prev[SEG - 1].copy(last);
       }
+      e.preventDefault();
     };
-    const onUp = (e: PointerEvent) => {
+
+    const onUp = () => {
+      if (!dragging) return;
       dragging = false;
-      renderer.domElement.style.cursor = "grab";
-      try {
-        if (renderer.domElement.hasPointerCapture(e.pointerId)) {
-          renderer.domElement.releasePointerCapture(e.pointerId);
-        }
-      } catch {
-        /* nothing captured */
-      }
+      hovering = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
-    renderer.domElement.addEventListener("pointerdown", onDown);
-    renderer.domElement.addEventListener("pointermove", onMove);
-    renderer.domElement.addEventListener("pointerup", onUp);
-    renderer.domElement.addEventListener("pointercancel", onUp);
+
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
 
     // ── Frame ───────────────────────────────────────────────────────────────
     const tmp = new THREE.Vector3();
@@ -466,10 +489,12 @@ export default function Lanyard3D() {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      renderer.domElement.removeEventListener("pointerdown", onDown);
-      renderer.domElement.removeEventListener("pointermove", onMove);
-      renderer.domElement.removeEventListener("pointerup", onUp);
-      renderer.domElement.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
       bandGeo.dispose();
       bandTex.dispose();
       cardMat.forEach((m) => { m.map?.dispose(); m.dispose(); });

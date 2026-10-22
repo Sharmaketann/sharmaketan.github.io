@@ -204,16 +204,6 @@ export default function Home() {
                 Resume&nbsp;→
               </button>
             </motion.div>
-          </div>
-
-          {/* ── Right: photo + availability badge ── */}
-          <motion.div
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-            className="md:col-span-5 lg:col-span-1 w-full flex flex-col items-start gap-4"
-          >
-            <LanyardPass />
 
             {/* Availability badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
@@ -283,7 +273,16 @@ export default function Home() {
                 ))}
               </div>
             </motion.div>
-          </motion.div>
+          </div>
+
+          {/* ── Right: the pass ──
+              Plain div on purpose. framer-motion animates with a transform,
+              and a transformed ancestor becomes the containing block for
+              position:fixed — which pinned the overlay to this column
+              instead of the viewport. */}
+          <div className="md:col-span-5 lg:col-span-1 w-full flex flex-col items-start gap-4">
+            <LanyardPass />
+          </div>
         </div>
 
         {/* ── Career plotted as an equity curve ── */}

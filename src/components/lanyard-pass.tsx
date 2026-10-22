@@ -10,10 +10,12 @@ import dynamic from "next/dynamic";
  * bundle and off every route that is not the homepage. The placeholder
  * reserves the exact height so nothing reflows when it arrives.
  *
- * The column it sits in is only ~390px inside a max-w-5xl page, which is too
- * small for the badge to carry the hero, so from `lg` up it bleeds past the
- * container to the right. html has overflow-x: clip, so the bleed cannot
- * produce a horizontal scrollbar.
+ * From `lg` up it leaves the grid entirely and hangs over the page as a fixed
+ * overlay on the right, the way the reference does — the strap starts at the
+ * top of the viewport rather than inside a card. The canvas is
+ * pointer-events:none and the drag is raycast from window listeners, so the
+ * page underneath stays fully clickable. Below `lg` it stays inline in the
+ * hero, because an overlay on a phone would simply cover the content.
  */
 const Lanyard3D = dynamic(() => import("./lanyard-3d"), {
   ssr: false,
@@ -23,12 +25,17 @@ const Lanyard3D = dynamic(() => import("./lanyard-3d"), {
 export function LanyardPass() {
   return (
     <div
-      className="flex flex-col w-full h-[440px] sm:h-[560px] lg:h-[760px] xl:h-[860px]"
+      className="
+        flex flex-col w-full h-[440px] sm:h-[560px]
+        lg:fixed lg:top-0 lg:right-0 lg:z-20
+        lg:h-screen lg:w-[min(44vw,560px)]
+        lg:pointer-events-none
+      "
     >
       <div className="flex-1 min-h-0">
         <Lanyard3D />
       </div>
-      <p className="shrink-0 pt-1 text-center font-mono text-[8.5px] text-gray-400 dark:text-gray-600 pointer-events-none">
+      <p className="shrink-0 pt-1 lg:pb-6 text-center font-mono text-[8.5px] text-gray-400 dark:text-gray-600 pointer-events-none">
         drag the pass
       </p>
     </div>

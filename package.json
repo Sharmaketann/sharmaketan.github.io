@@ -44,10 +44,12 @@
     "shiki": "^0.14.4",
     "tailwind-merge": "^1.14.0",
     "tailwindcss": "3.3.3",
+    "three": "^0.186.1",
     "typescript": "5.2.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
+    "@types/three": "^0.186.0",
     "prettier": "^3.0.3",
     "prettier-plugin-tailwindcss": "^0.5.4"
   }

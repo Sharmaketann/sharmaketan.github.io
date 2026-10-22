@@ -50,7 +50,7 @@ export function Header() {
 
         {/* ── Nav links ────────────────────────────────────────── */}
         {/* Scrollable on narrow screens so a seventh item never breaks it. */}
-        <ul className="flex items-center gap-5 sm:gap-6 md:gap-7 overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 sm:order-2">
+        <ul className="flex items-center gap-[15px] sm:gap-6 md:gap-7 overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 sm:order-2">
           {NAV.map(({ path, name }) => {
             const active = path === "/" ? pathname === "/" : pathname.startsWith(path);
             return (
@@ -58,7 +58,7 @@ export function Header() {
                 <Link
                   href={path}
                   className={cn(
-                    "relative text-sm pb-0.5 transition-colors whitespace-nowrap",
+                    "relative text-[13.5px] sm:text-sm pb-0.5 transition-colors whitespace-nowrap",
                     active
                       ? "text-gray-900 dark:text-gray-100 font-medium"
                       : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"

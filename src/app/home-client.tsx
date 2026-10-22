@@ -100,10 +100,10 @@ export default function Home() {
       <section className="pb-10">
 
         {/* ── Main block: text left, photo right ── */}
-        <div className="grid md:grid-cols-12 gap-10 md:gap-12 pt-2 items-start">
+        <div className="grid md:grid-cols-12 lg:grid-cols-[1fr_minmax(0,460px)] gap-10 md:gap-12 pt-2 items-start">
 
           {/* ── Left: editorial text ── */}
-          <div className="md:col-span-7 min-w-0">
+          <div className="md:col-span-7 lg:col-span-1 min-w-0">
 
             {/* Role label */}
             <motion.div {...fadeUp(0)} className="flex items-center gap-2 mb-6">
@@ -211,7 +211,7 @@ export default function Home() {
             initial={{ opacity: 0, x: 12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-            className="md:col-span-5 w-full flex flex-col items-start gap-4"
+            className="md:col-span-5 lg:col-span-1 w-full flex flex-col items-start gap-4"
           >
             <LanyardPass />
 

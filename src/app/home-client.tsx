@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { SOCIALS } from "../data/socials";
 import { SocialLink } from "@/components/social-link";
 import { allBlogs } from "contentlayer/generated";
@@ -15,6 +14,7 @@ import { MarketStatusPill } from "@/components/market-status";
 import { Tearsheet } from "@/components/tearsheet";
 import { PositionsBook } from "@/components/positions-book";
 import { ApiProof } from "@/components/api-proof";
+import { LanyardPass } from "@/components/lanyard-pass";
 
 // ── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -213,14 +213,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
             className="md:col-span-5 w-full flex flex-col items-start gap-4"
           >
-            <Image
-              src="/_static/me1.jpg"
-              width={224}
-              height={224}
-              alt={`${PORTFOLIO_CONFIG.name} — avatar`}
-              priority
-              className="rounded-2xl object-cover w-28 h-28 md:w-36 md:h-36 shrink-0"
-            />
+            <LanyardPass />
 
             {/* Availability badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">

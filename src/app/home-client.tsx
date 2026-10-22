@@ -100,7 +100,7 @@ export default function Home() {
       <section className="pb-10">
 
         {/* ── Main block: text left, photo right ── */}
-        <div className="grid md:grid-cols-12 lg:grid-cols-[1fr_minmax(0,460px)] gap-10 md:gap-12 pt-2 items-start">
+        <div className="grid md:grid-cols-12 lg:grid-cols-[1fr_minmax(0,500px)] gap-10 md:gap-12 pt-2 items-start">
 
           {/* ── Left: editorial text ── */}
           <div className="md:col-span-7 lg:col-span-1 min-w-0">

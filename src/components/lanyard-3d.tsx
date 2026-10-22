@@ -19,8 +19,8 @@ import * as THREE from "three";
  * bundle or any other route.
  */
 
-const SEG = 8;               // rope points
-const SEG_LEN = 0.22;        // world units between points
+const SEG = 12;              // rope points
+const SEG_LEN = 0.24;        // world units between points
 const GRAVITY = -0.0062;
 const DAMP = 0.94;
 const ITER = 18;
@@ -28,7 +28,7 @@ const ITER = 18;
 const CARD_W = 1.95;
 const CARD_H = 2.76;
 const CARD_T = 0.045;
-const BAND_W = 0.26;
+const BAND_W = 0.21;
 
 /** canvas letterSpacing ships in Chrome but is not in TS's DOM lib yet. */
 type Ctx2D = CanvasRenderingContext2D & { letterSpacing: string };
@@ -36,7 +36,14 @@ type Ctx2D = CanvasRenderingContext2D & { letterSpacing: string };
 const BRASS = "#c08a3e";
 const UP = "#1fa97a";
 
-/** Draw the badge face into a canvas and hand it back as a texture. */
+/**
+ * Draw the badge face into a canvas and hand it back as a texture.
+ *
+ * Laid out like the reference: a cream card, a small mono header rule, the
+ * portrait centred as a rounded tile, the name and role centred under it, and
+ * a mono footer rule. Light card against the dark strap is what gives it the
+ * contrast the brass-on-dark version was missing.
+ */
 function makeCardTexture(photo: HTMLImageElement | null): THREE.CanvasTexture {
   const W = 600;
   const H = 848;
@@ -45,122 +52,114 @@ function makeCardTexture(photo: HTMLImageElement | null): THREE.CanvasTexture {
   c.height = H;
   const x = c.getContext("2d")! as Ctx2D;
 
-  const bg = x.createLinearGradient(0, 0, W * 0.4, H);
-  bg.addColorStop(0, "#232a38");
-  bg.addColorStop(0.45, "#171d27");
-  bg.addColorStop(1, "#0f131a");
+  const INK = "#17171a";
+  const MUTED = "#8b8880";
+  const RULE = "rgba(23,23,26,.14)";
+
+  // Card stock
+  const bg = x.createLinearGradient(0, 0, W * 0.6, H);
+  bg.addColorStop(0, "#f4f1ea");
+  bg.addColorStop(0.55, "#ece8df");
+  bg.addColorStop(1, "#e2ddd2");
   x.fillStyle = bg;
   x.fillRect(0, 0, W, H);
 
-  // Firm bar
-  const bar = x.createLinearGradient(0, 0, W, 0);
-  bar.addColorStop(0, "rgba(192,138,62,.30)");
-  bar.addColorStop(0.7, "rgba(192,138,62,0)");
-  x.fillStyle = bar;
-  x.fillRect(0, 0, W, 78);
-  x.fillStyle = BRASS;
-  x.fillRect(34, 30, 20, 20);
-  x.fillStyle = "#e7ebf0";
-  x.font = "600 20px ui-monospace, monospace";
-  x.letterSpacing = "4px";
-  x.fillText("SHARMAKETANN", 68, 46);
-  x.fillStyle = "#6f7987";
-  x.font = "16px ui-monospace, monospace";
-  x.fillText("EST. 2021", W - 150, 46);
-  x.fillStyle = "rgba(190,200,215,.16)";
-  x.fillRect(0, 78, W, 1.5);
+  // Punch slot
+  x.fillStyle = "rgba(23,23,26,.82)";
+  x.beginPath();
+  x.roundRect(W / 2 - 54, 34, 108, 20, 10);
+  x.fill();
 
-  // Photo
-  const px = 40;
-  const py = 112;
-  const pw = 212;
-  const ph = 258;
+  // Header rule
+  x.fillStyle = MUTED;
+  x.font = "600 16px ui-monospace, monospace";
+  x.letterSpacing = "3px";
+  x.textBaseline = "alphabetic";
+  x.fillText("STUDIO", 42, 108);
+  const yr = "2026";
+  x.textAlign = "right";
+  x.fillText(yr, W - 42, 108);
+  x.textAlign = "left";
+  x.fillStyle = RULE;
+  x.fillRect(42, 126, W - 84, 1.5);
+
+  // Portrait tile, centred
+  const ts = 236;
+  const tx = (W - ts) / 2;
+  const ty = 178;
   x.save();
   x.beginPath();
-  x.roundRect(px, py, pw, ph, 10);
+  x.roundRect(tx, ty, ts, ts, 26);
   x.clip();
   if (photo) {
-    const r = Math.max(pw / photo.width, ph / photo.height);
+    const r = Math.max(ts / photo.width, ts / photo.height);
     const dw = photo.width * r;
     const dh = photo.height * r;
-    x.drawImage(photo, px + (pw - dw) / 2, py + (ph - dh) / 2, dw, dh);
+    x.drawImage(photo, tx + (ts - dw) / 2, ty + (ts - dh) / 2, dw, dh);
   } else {
-    x.fillStyle = "#2a3140";
-    x.fillRect(px, py, pw, ph);
+    x.fillStyle = "#1d1d21";
+    x.fillRect(tx, ty, ts, ts);
   }
   x.restore();
-  x.strokeStyle = "rgba(190,200,215,.28)";
+  x.strokeStyle = "rgba(23,23,26,.16)";
   x.lineWidth = 2;
   x.beginPath();
-  x.roundRect(px, py, pw, ph, 10);
+  x.roundRect(tx, ty, ts, ts, 26);
   x.stroke();
 
-  // Bearer
-  const tx = px + pw + 30;
-  x.fillStyle = "#6f7987";
-  x.font = "16px ui-monospace, monospace";
-  x.letterSpacing = "3px";
-  x.fillText("BEARER", tx, py + 20);
+  // Name + role, centred
+  x.textAlign = "center";
+  x.fillStyle = INK;
   x.letterSpacing = "0px";
-  x.fillStyle = "#f3f6f9";
-  x.font = "600 40px ui-sans-serif, system-ui, sans-serif";
-  x.fillText("Sharma", tx, py + 74);
-  x.fillText("Ketan", tx, py + 120);
-  x.fillStyle = BRASS;
-  x.font = "19px ui-monospace, monospace";
-  x.letterSpacing = "1.5px";
-  x.fillText("SENIOR BACKEND", tx, py + 164);
-  x.fillText("DEVELOPER", tx, py + 190);
+  x.font = "600 46px ui-sans-serif, system-ui, sans-serif";
+  x.fillText("Sharma Ketan", W / 2, 506);
+  x.fillStyle = MUTED;
+  x.font = "20px ui-sans-serif, system-ui, sans-serif";
+  x.fillText("Senior Backend Developer", W / 2, 540);
 
-  // Credential grid
-  const rows: [string, string][] = [
+  // Accent rule
+  x.fillStyle = BRASS;
+  x.fillRect(W / 2 - 30, 568, 60, 2.5);
+
+  // Detail pairs
+  const pairs: [string, string][] = [
     ["DESK", "Market Data"],
-    ["ID", "SK-2026-01"],
-    ["CLEARANCE", "Backend"],
     ["BASED", "Mumbai"],
   ];
-  rows.forEach(([k, v], i) => {
-    const cx = 40 + (i % 2) * 280;
-    const cy = 430 + Math.floor(i / 2) * 76;
-    x.fillStyle = "#67707e";
-    x.font = "15px ui-monospace, monospace";
+  pairs.forEach(([k, v], i) => {
+    const cx = i === 0 ? 150 : W - 150;
+    x.fillStyle = MUTED;
+    x.font = "14px ui-monospace, monospace";
     x.letterSpacing = "2.5px";
-    x.fillText(k, cx, cy);
+    x.fillText(k, cx, 636);
     x.letterSpacing = "0px";
-    x.fillStyle = "#dfe4ea";
-    x.font = "22px ui-monospace, monospace";
-    x.fillText(v, cx, cy + 30);
+    x.fillStyle = INK;
+    x.font = "20px ui-sans-serif, system-ui, sans-serif";
+    x.fillText(v, cx, 664);
   });
 
-  // Holographic strip
-  const holo = x.createLinearGradient(40, 0, W - 40, 0);
-  holo.addColorStop(0, "rgba(192,138,62,.55)");
-  holo.addColorStop(0.34, "rgba(31,169,122,.5)");
-  holo.addColorStop(0.62, "rgba(120,160,220,.5)");
-  holo.addColorStop(1, "rgba(192,138,62,.55)");
-  x.fillStyle = holo;
-  x.beginPath();
-  x.roundRect(40, 606, W - 80, 46, 5);
-  x.fill();
+  // Footer rule
+  x.fillStyle = RULE;
+  x.fillRect(42, 720, W - 84, 1.5);
+  x.textAlign = "left";
+  x.fillStyle = MUTED;
+  x.font = "600 16px ui-monospace, monospace";
+  x.letterSpacing = "3px";
+  x.fillText("SK-2026-01", 42, 762);
+  x.textAlign = "right";
+  x.fillStyle = UP;
+  x.fillText("ACTIVE", W - 42, 762);
+  x.textAlign = "left";
 
   // Barcode
-  x.fillStyle = "rgba(190,200,215,.12)";
-  x.fillRect(40, 690, W - 80, 1.5);
-  let bx = 44;
-  const heights = [34, 14, 44, 10, 28, 19, 39, 15, 24, 44, 10, 33, 19, 38, 14, 29, 44, 11, 25, 36, 15, 40, 20, 31];
+  let bx = 42;
+  const heights = [26, 10, 32, 8, 20, 14, 30, 11, 18, 32, 8, 24, 14, 28, 10, 22, 32, 9, 19, 27];
   heights.forEach((h, i) => {
-    x.fillStyle = "rgba(205,213,224,.5)";
-    const w = i % 3 === 0 ? 7 : 4;
-    x.fillRect(bx, 770 - h, w, h);
-    bx += w + 6;
+    x.fillStyle = "rgba(23,23,26,.4)";
+    const w = i % 3 === 0 ? 6 : 3;
+    x.fillRect(bx, 806 - h, w, h);
+    bx += w + 5;
   });
-  x.fillStyle = UP;
-  x.beginPath();
-  x.arc(W - 96, 752, 6, 0, Math.PI * 2);
-  x.fill();
-  x.font = "16px ui-monospace, monospace";
-  x.letterSpacing = "2px";
-  x.fillText("ACTIVE", W - 82, 758);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -168,7 +167,8 @@ function makeCardTexture(photo: HTMLImageElement | null): THREE.CanvasTexture {
   return tex;
 }
 
-/** Repeating webbing texture with the site name printed along it. */
+/** Repeating webbing texture — black strap with light print, as in the
+ *  reference, rather than the brass ribbon this started as. */
 function makeBandTexture(): THREE.CanvasTexture {
   const W = 512;
   const H = 64;
@@ -178,30 +178,42 @@ function makeBandTexture(): THREE.CanvasTexture {
   const x = c.getContext("2d")! as Ctx2D;
 
   const g = x.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#6d4b17");
-  g.addColorStop(0.3, "#c08a3e");
-  g.addColorStop(0.5, "#e3b96d");
-  g.addColorStop(0.72, "#b87f32");
-  g.addColorStop(1, "#5e400f");
+  g.addColorStop(0, "#0e0e10");
+  g.addColorStop(0.26, "#2b2b30");
+  g.addColorStop(0.5, "#3a3a41");
+  g.addColorStop(0.74, "#27272c");
+  g.addColorStop(1, "#0b0b0d");
   x.fillStyle = g;
   x.fillRect(0, 0, W, H);
 
-  // Weave
-  x.strokeStyle = "rgba(0,0,0,.10)";
+  // Weave: fine vertical threads plus a faint twill.
+  x.strokeStyle = "rgba(255,255,255,.045)";
   x.lineWidth = 1;
-  for (let i = 0; i < W; i += 4) {
+  for (let i = 0; i < W; i += 3) {
     x.beginPath();
     x.moveTo(i, 0);
     x.lineTo(i, H);
     x.stroke();
   }
+  x.strokeStyle = "rgba(0,0,0,.3)";
+  for (let i = -H; i < W; i += 9) {
+    x.beginPath();
+    x.moveTo(i, 0);
+    x.lineTo(i + H, H);
+    x.stroke();
+  }
 
-  x.fillStyle = "rgba(0,0,0,.42)";
-  x.font = "600 17px ui-monospace, monospace";
-  x.letterSpacing = "5px";
+  // Stitched edges
+  x.fillStyle = "rgba(255,255,255,.1)";
+  x.fillRect(0, 3, W, 1);
+  x.fillRect(0, H - 4, W, 1);
+
+  x.fillStyle = "rgba(226,230,236,.5)";
+  x.font = "600 15px ui-monospace, monospace";
+  x.letterSpacing = "6px";
   x.textBaseline = "middle";
-  x.fillText("SHARMAKETANN.IN", 26, H / 2 + 1);
-  x.fillText("SHARMAKETANN.IN", 286, H / 2 + 1);
+  x.fillText("SHARMAKETANN.IN", 30, H / 2 + 1);
+  x.fillText("SHARMAKETANN.IN", 290, H / 2 + 1);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -222,7 +234,7 @@ export default function Lanyard3D() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    camera.position.set(0, 0, 8.2);
+    camera.position.set(0, 0, 10.4);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -243,7 +255,7 @@ export default function Lanyard3D() {
     scene.add(rim);
 
     // ── Rope ────────────────────────────────────────────────────────────────
-    const anchor = new THREE.Vector3(0, 2.15, 0);
+    const anchor = new THREE.Vector3(0, 2.75, 0);
     const pos: THREE.Vector3[] = [];
     const prev: THREE.Vector3[] = [];
     for (let i = 0; i < SEG; i++) {
@@ -293,13 +305,11 @@ export default function Lanyard3D() {
     // ── Card ────────────────────────────────────────────────────────────────
     const img = new window.Image();
     img.crossOrigin = "anonymous";
+    const edge = () => new THREE.MeshStandardMaterial({ color: 0xd8d2c6, roughness: 0.85 });
     const cardMat = [
-      new THREE.MeshStandardMaterial({ color: 0x10141b, roughness: 0.6 }),
-      new THREE.MeshStandardMaterial({ color: 0x10141b, roughness: 0.6 }),
-      new THREE.MeshStandardMaterial({ color: 0x10141b, roughness: 0.6 }),
-      new THREE.MeshStandardMaterial({ color: 0x10141b, roughness: 0.6 }),
-      new THREE.MeshStandardMaterial({ map: makeCardTexture(null), roughness: 0.42, metalness: 0.08 }),
-      new THREE.MeshStandardMaterial({ color: 0x151a22, roughness: 0.7 }),
+      edge(), edge(), edge(), edge(),
+      new THREE.MeshStandardMaterial({ map: makeCardTexture(null), roughness: 0.52, metalness: 0.02 }),
+      new THREE.MeshStandardMaterial({ color: 0xe6e1d6, roughness: 0.8 }),
     ];
     img.onload = () => {
       cardMat[4].map?.dispose();
@@ -445,7 +455,7 @@ export default function Lanyard3D() {
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       // Pull the camera back on narrow viewports so the badge still fits.
-      camera.position.z = THREE.MathUtils.clamp(9.6 - (w - 300) / 190, 7.3, 11.2);
+      camera.position.z = THREE.MathUtils.clamp(11.8 - (w - 300) / 190, 9.4, 13.4);
       camera.updateProjectionMatrix();
     };
     const ro = new ResizeObserver(resize);

@@ -23,7 +23,7 @@ const Lanyard3D = dynamic(() => import("./lanyard-3d"), {
 export function LanyardPass() {
   return (
     <div
-      className="flex flex-col w-full h-[420px] sm:h-[500px] lg:h-[660px] xl:h-[740px]"
+      className="flex flex-col w-full h-[440px] sm:h-[560px] lg:h-[760px] xl:h-[860px]"
     >
       <div className="flex-1 min-h-0">
         <Lanyard3D />

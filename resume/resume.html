@@ -27,7 +27,9 @@
     --muted:#79828f;
     --rule:#dde2e8;
     --rule-strong:#b9c2cb;
-    --accent:#0f5c4a;
+    --accent:#a8721f;
+    --accent-soft:#f3e7d2;
+    --up:#1a7f5a;
   }
 
   *{box-sizing:border-box}
@@ -48,7 +50,7 @@
     min-height:297mm;
     margin:0 auto;
     background:var(--paper);
-    padding:11mm 13mm 10mm;
+    padding:9.5mm 13mm 8mm;
   }
 
   .name{
@@ -58,7 +60,7 @@
   }
   .role{margin:4px 0 0;font-size:12px;font-weight:500;color:var(--accent);letter-spacing:.01em}
   .contact{
-    margin:8px 0 0;padding-top:8px;border-top:1.5px solid var(--rule-strong);
+    margin:8px 0 0;padding-top:8px;border-top:1.5px solid var(--accent);
     font-family:"IBM Plex Mono",ui-monospace,monospace;
     font-size:9px;line-height:1.65;color:var(--ink-soft);
     display:flex;flex-wrap:wrap;gap:1px 9px;
@@ -66,19 +68,48 @@
   .contact a{color:var(--ink-soft);text-decoration:none}
   .sep{color:var(--rule-strong)}
 
-  section{margin-top:11px}
-  .sec-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  section{margin-top:9px}
+  .sec-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
   .sec-head h2{
     font-family:"IBM Plex Mono",ui-monospace,monospace;
     font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;
     color:var(--accent);margin:0;white-space:nowrap;
   }
+  .sec-head::before{
+    content:"";width:5px;height:5px;flex:none;border-radius:50%;
+    background:var(--accent);
+  }
   .sec-head::after{content:"";flex:1;height:1px;background:var(--rule)}
 
-  .summary{margin:0;font-size:10.4px;line-height:1.55;color:var(--ink-soft)}
+  .summary{margin:0;font-size:10.3px;line-height:1.5;color:var(--ink-soft)}
   .summary strong{color:var(--ink);font-weight:600}
 
-  .jobs{display:flex;flex-direction:column;gap:9px}
+  /* Factsheet strip under the contact line — the same six figures the site's
+     tearsheet shows, as plain text so it still extracts. */
+  .sheet-strip{
+    display:flex;flex-wrap:wrap;gap:3px 0;
+    margin:6px 0 0;padding:4px 0 0;
+    border-top:1px solid var(--rule);
+  }
+  .sheet-strip div{padding-right:14px;margin-right:14px;border-right:1px solid var(--rule)}
+  .sheet-strip div:last-child{border-right:0;margin-right:0;padding-right:0}
+  .sheet-strip b{
+    display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:10px;font-weight:500;color:var(--ink);line-height:1.2;
+  }
+  .sheet-strip span{
+    display:block;font-size:7.6px;color:var(--muted);
+    letter-spacing:.04em;text-transform:uppercase;margin-top:1px;
+  }
+
+  /* Ticker code beside each role, the way the blotter lists a position. */
+  .sym{
+    display:inline-block;min-width:62px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:8.6px;letter-spacing:.06em;color:var(--accent);
+  }
+
+  .jobs{display:flex;flex-direction:column;gap:7.5px}
   .job{break-inside:avoid}
   .job-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
   .job-title{margin:0;font-size:11.8px;font-weight:600;color:var(--ink);line-height:1.25}
@@ -134,8 +165,19 @@
 <div class="sheet">
 
   <header>
-    <h1 class="name">Sharma Ketan Umesh</h1>
-    <p class="role">Senior Backend Developer &middot; Full-Stack Engineer</p>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <h1 class="name">Sharma Ketan Umesh</h1>
+        <p class="role">Senior Backend Developer &middot; Full-Stack Engineer</p>
+      </div>
+      <svg viewBox="0 0 150 34" width="150" height="34" aria-hidden="true" style="flex:none;margin-top:4px">
+        <polyline
+          points="1,30 7,29.4 13,29.8 19,28.4 25,27.2 31,27.6 37,25.8 43,24.4 49,25 55,23 61,21.2 67,21.8 73,20 79,18.2 85,18.8 91,16.4 97,15 103,15.6 109,13.2 115,11.4 121,9.8 127,10.4 133,8 139,6.4 145,4.6"
+          fill="none" stroke="#a8721f" stroke-width="1.4"
+          stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="145" cy="4.6" r="2" fill="#1a7f5a" />
+      </svg>
+    </div>
     <div class="contact">
       <span>Mumbai, India</span><span class="sep">/</span>
       <a href="tel:+919175190931">+91 91751 90931</a><span class="sep">/</span>
@@ -143,6 +185,15 @@
       <a href="https://sharmaketann.in">sharmaketann.in</a><span class="sep">/</span>
       <a href="https://www.linkedin.com/in/sharmaketann/">linkedin.com/in/sharmaketann</a><span class="sep">/</span>
       <a href="https://github.com/Sharmaketann">github.com/Sharmaketann</a>
+    </div>
+
+    <div class="sheet-strip">
+      <div><b>4+ yrs</b><span>In market</span></div>
+      <div><b>4</b><span>Positions</span></div>
+      <div><b>3</b><span>Sectors</span></div>
+      <div><b>200+</b><span>Carrier APIs</span></div>
+      <div><b>13+</b><span>Insurers</span></div>
+      <div><b>Mumbai</b><span>Based</span></div>
     </div>
   </header>
 
@@ -157,7 +208,7 @@
 
       <article class="job">
         <div class="job-top">
-          <h3 class="job-title">Senior Backend Developer <span class="co">&middot; Wizzer AdvisorTech Pvt. Ltd.</span></h3>
+          <h3 class="job-title"><span class="sym">WIZZER</span>Senior Backend Developer <span class="co">&middot; Wizzer AdvisorTech Pvt. Ltd.</span></h3>
           <span class="job-when">Jan 2026 - Present</span>
         </div>
         <p class="job-where">Mumbai, India &middot; WealthTech &mdash; AI quant &amp; algo trading terminal for registered investment advisors</p>
@@ -171,7 +222,7 @@
 
       <article class="job">
         <div class="job-top">
-          <h3 class="job-title">Full Stack Lead Developer <span class="co">&middot; Insure Efficient</span></h3>
+          <h3 class="job-title"><span class="sym">INSEFF</span>Full Stack Lead Developer <span class="co">&middot; Insure Efficient</span></h3>
           <span class="job-when">Nov 2023 - Dec 2025</span>
         </div>
         <p class="job-where">Mumbai, India &middot; Insurance technology</p>
@@ -187,7 +238,7 @@
 
       <article class="job">
         <div class="job-top">
-          <h3 class="job-title">Full Stack Developer <span class="co">&middot; Sapio Analytics</span></h3>
+          <h3 class="job-title"><span class="sym">SAPIO</span>Full Stack Developer <span class="co">&middot; Sapio Analytics</span></h3>
           <span class="job-when">Sep 2022 - Oct 2023</span>
         </div>
         <p class="job-where">Mumbai, India &middot; Data &amp; governance analytics</p>
@@ -201,7 +252,7 @@
 
       <article class="job">
         <div class="job-top">
-          <h3 class="job-title">.NET Developer Intern <span class="co">&middot; Ushyaku Software Solution</span></h3>
+          <h3 class="job-title"><span class="sym">USHYAKU</span>.NET Developer Intern <span class="co">&middot; Ushyaku Software Solution</span></h3>
           <span class="job-when">Jul 2021 - Oct 2021</span>
         </div>
         <p class="job-where">Remote</p>

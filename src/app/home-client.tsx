@@ -12,6 +12,9 @@ import { motion } from "framer-motion";
 import { ResumeModal } from "@/components/resume-modal";
 import { CareerCurve } from "@/components/career-curve";
 import { MarketStatusPill } from "@/components/market-status";
+import { Tearsheet } from "@/components/tearsheet";
+import { PositionsBook } from "@/components/positions-book";
+import { ApiProof } from "@/components/api-proof";
 
 // ── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -32,12 +35,6 @@ const FOCUS = [
 const TECH = [
   "TypeScript", "React", "Next.js", "Node.js",
   "MongoDB", "PostgreSQL", "Express", "AWS",
-];
-
-const STATS = [
-  { value: "4+",   label: "Years shipping"     },
-  { value: "200+", label: "APIs integrated"    },
-  { value: "13+",  label: "Insurers connected" },
 ];
 
 // ── What I'm working on right now ────────────────────────────────────────────
@@ -175,26 +172,9 @@ export default function Home() {
               ))}
             </motion.ul>
 
-            {/* Stats row */}
-            <motion.div
-              {...fadeUp(0.44)}
-              className="flex w-fit items-center gap-6 mb-8 py-4 border-y border-gray-100 dark:border-zinc-800"
-            >
-              {STATS.map(({ value, label }, i) => (
-                <React.Fragment key={label}>
-                  <div>
-                    <div className="text-2xl font-bold tracking-tight tabular-nums text-gray-900 dark:text-gray-100">
-                      {value}
-                    </div>
-                    <div className="text-[11px] text-gray-400 dark:text-gray-500 tracking-wide mt-0.5">
-                      {label}
-                    </div>
-                  </div>
-                  {i < STATS.length - 1 && (
-                    <div className="h-7 w-px bg-gray-100 dark:bg-zinc-800" />
-                  )}
-                </React.Fragment>
-              ))}
+            {/* Tearsheet — factsheet shape, drawdown included */}
+            <motion.div {...fadeUp(0.44)} className="mb-8">
+              <Tearsheet />
             </motion.div>
 
             {/* Social icons + Resume CTA */}
@@ -210,6 +190,8 @@ export default function Home() {
                   icon={social.icon}
                 />
               ))}
+
+              <ApiProof />
 
               <button
                 onClick={() => setResumeOpen(true)}
@@ -345,6 +327,9 @@ export default function Home() {
           ))}
         </motion.div>
       </section>
+
+      {/* ── The book: engineering opinions as positions ─────────────────── */}
+      <PositionsBook />
 
       {/* ── Latest posts — below the fold ───────────────────────────────── */}
       <section className="pt-16 pb-4">

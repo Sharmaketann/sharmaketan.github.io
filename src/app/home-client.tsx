@@ -276,10 +276,12 @@ export default function Home() {
           </div>
 
           {/* ── Right: the pass ──
-              Plain div on purpose. framer-motion animates with a transform,
-              and a transformed ancestor becomes the containing block for
-              position:fixed — which pinned the overlay to this column
-              instead of the viewport. */}
+              Plain div on purpose, and it must stay plain. framer-motion
+              animates with a transform, and a transformed ancestor becomes the
+              containing block for positioned descendants — which would re-anchor
+              the pass to this column instead of to `main`. The column itself
+              still reserves its 500px track, which is the space the pass is
+              sized to hang in. */}
           <div className="md:col-span-5 lg:col-span-1 w-full flex flex-col items-start gap-4">
             <LanyardPass />
           </div>

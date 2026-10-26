@@ -164,7 +164,12 @@ export default function RootLayout({
               <Analytics />
             </main>
           ) : (
-            <main className="relative z-10 mx-4 px-2 md:px-0 lg:mx-auto flex flex-col justify-between min-h-screen">
+            <main className="relative z-10 mx-4 px-2 md:px-0 lg:mx-auto lg:px-6 flex flex-col justify-between min-h-screen">
+              {/* lg:px-6 is load bearing. Up to md the gutter comes from mx-4,
+                  and past ~1040px it comes from body's max-w-5xl leaving auto
+                  margins — but between those, at exactly lg, mx-auto cancels
+                  mx-4 and nothing replaces it, so the text ran edge to edge.
+                  1024 CSS px is where a 1280 laptop at 125% scaling lands. */}
               <div className="relative left-1/2 -translate-x-1/2 w-screen">
                 <TickerTape />
               </div>

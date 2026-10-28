@@ -29,13 +29,12 @@ import dynamic from "next/dynamic";
  * positioned against the padding box, so the 24px inset is what puts its right
  * edge on main's content edge, level with every other section on the page.
  *
- * From `xl` the body stops growing (max-w-5xl) while the window keeps going,
- * so a widening band of dead space opens either side — 465px of it at 1920.
- * The calc spends the right-hand half of it: a percentage offset resolves
- * against the containing block, so `(100vw - 100%) / 2` *is* that margin, and
- * subtracting it walks the pass out of the column until its right edge sits a
- * gutter from the window. One expression covers every width, and it collapses
- * back to the `lg` behaviour on its own once the margin goes to zero.
+ * It used to walk further out than that, into the page margin, back when the
+ * shell was max-w-5xl and there was ~440px of dead band either side at 1920.
+ * The shell is max-w-7xl now, which moves this column 370px right on its own,
+ * and chasing the window edge on top of that only tore a hole between the hero
+ * text and the card: the grid still reserves the 500px track, so the pass has
+ * to land *in* it, not past it.
  */
 const Lanyard3D = dynamic(() => import("./lanyard-3d"), {
   ssr: false,
@@ -49,7 +48,6 @@ export function LanyardPass() {
         flex flex-col w-full h-[440px] sm:h-[560px]
         lg:absolute lg:top-0 lg:right-6 lg:z-20
         lg:h-[min(100vh,900px)] lg:w-[500px]
-        xl:right-[calc(2rem_-_((100vw_-_100%)_/_2))]
         lg:pointer-events-none
       "
     >

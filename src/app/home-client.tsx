@@ -146,7 +146,7 @@ export default function Home() {
             {/* Bio */}
             <motion.p
               {...fadeUp(0.32)}
-              className="text-gray-600 dark:text-gray-300 max-w-[54ch] mb-7 leading-relaxed text-sm md:text-base"
+              className="text-gray-600 dark:text-gray-300 max-w-[66ch] mb-7 leading-relaxed text-sm md:text-base"
             >
               Four years across insurance and capital markets. I led the team
               behind an insurance Point of Sale platform and wired up 200+

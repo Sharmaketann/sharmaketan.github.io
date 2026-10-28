@@ -88,7 +88,7 @@ export default async function Blog({ params }: { params: { slug: string } }) {
   };
 
   return (
-    <section>
+    <section className="max-w-[72ch]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

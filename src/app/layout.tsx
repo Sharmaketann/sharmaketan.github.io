@@ -90,9 +90,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <Head />
+      {/* body is full width and does the horizontal clipping; the max-w-5xl
+          cap sits on <main> instead. Both halves of that matter:
+
+          - It has to keep clipping. The ticker breaks out to 100vw, which is
+            wider than the document by the scrollbar, and without a clip here
+            that overhang scrolls the page sideways by ~8px. html's own clip
+            does not stop it.
+          - It cannot also be the 1024px box. The hanging pass is positioned
+            out into the page margin on purpose, and a clip on a 1024px body
+            sheared it off mid-card at the column edge. overflow-clip-margin
+            is not a way out: it suppresses the scroll but does not widen the
+            clip region. */}
       <body
         className={cn(
-          "mx-auto min-h-screen max-w-5xl overflow-x-clip antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
+          "min-h-screen overflow-x-clip antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
           space_grotesk.className,
         )}
       >
@@ -104,7 +116,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {isBlogSubdomain ? (
-            <main className="mx-4 px-2 md:px-0 lg:mx-auto flex flex-col min-h-screen">
+            <main className="max-w-5xl mx-4 px-2 md:px-0 lg:mx-auto flex flex-col min-h-screen">
               <header className="py-6 mb-8 border-b border-gray-100 dark:border-zinc-800">
                 <nav className="flex items-center justify-between">
                   <a
@@ -129,7 +141,7 @@ export default function RootLayout({
               </footer>
             </main>
           ) : isCvSubdomain ? (
-            <main className="mx-4 px-2 md:px-0 lg:mx-auto flex flex-col min-h-screen">
+            <main className="max-w-5xl mx-4 px-2 md:px-0 lg:mx-auto flex flex-col min-h-screen">
               <header className="py-6 mb-6 border-b border-gray-100 dark:border-zinc-800">
                 <nav className="flex items-center justify-between">
                   <a
@@ -164,12 +176,12 @@ export default function RootLayout({
               <Analytics />
             </main>
           ) : (
-            <main className="relative z-10 mx-4 px-2 md:px-0 lg:mx-auto lg:px-6 flex flex-col justify-between min-h-screen">
+            <main className="relative z-10 max-w-5xl mx-4 px-2 md:px-0 lg:mx-auto lg:px-6 flex flex-col justify-between min-h-screen">
               {/* lg:px-6 is load bearing. Up to md the gutter comes from mx-4,
-                  and past ~1040px it comes from body's max-w-5xl leaving auto
-                  margins — but between those, at exactly lg, mx-auto cancels
-                  mx-4 and nothing replaces it, so the text ran edge to edge.
-                  1024 CSS px is where a 1280 laptop at 125% scaling lands. */}
+                  and past ~1040px it comes from max-w-5xl leaving auto margins
+                  — but between those, at exactly lg, mx-auto cancels mx-4 and
+                  nothing replaces it, so the text ran edge to edge. 1024 CSS
+                  px is where a 1280 laptop at 125% scaling lands. */}
               <div className="relative left-1/2 -translate-x-1/2 w-screen">
                 <TickerTape />
               </div>

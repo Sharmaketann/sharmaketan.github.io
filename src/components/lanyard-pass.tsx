@@ -28,6 +28,14 @@ import dynamic from "next/dynamic";
  * and the badge. `right-6` mirrors main's `lg:px-6`: an absolute box is
  * positioned against the padding box, so the 24px inset is what puts its right
  * edge on main's content edge, level with every other section on the page.
+ *
+ * From `xl` the body stops growing (max-w-5xl) while the window keeps going,
+ * so a widening band of dead space opens either side — 465px of it at 1920.
+ * The calc spends the right-hand half of it: a percentage offset resolves
+ * against the containing block, so `(100vw - 100%) / 2` *is* that margin, and
+ * subtracting it walks the pass out of the column until its right edge sits a
+ * gutter from the window. One expression covers every width, and it collapses
+ * back to the `lg` behaviour on its own once the margin goes to zero.
  */
 const Lanyard3D = dynamic(() => import("./lanyard-3d"), {
   ssr: false,
@@ -41,6 +49,7 @@ export function LanyardPass() {
         flex flex-col w-full h-[440px] sm:h-[560px]
         lg:absolute lg:top-0 lg:right-6 lg:z-20
         lg:h-[min(100vh,900px)] lg:w-[500px]
+        xl:right-[calc(2rem_-_((100vw_-_100%)_/_2))]
         lg:pointer-events-none
       "
     >

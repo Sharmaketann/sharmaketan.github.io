@@ -40,7 +40,9 @@ const VMAX = 0.14;         // per-step displacement cap — nothing outruns the 
 const ITERS = 10;          // constraint passes
 
 const ROPE_N = 11;
-const SEG = 0.22;
+const SEG = 0.24;
+/** Half the gap between the two runs where they leave the top of frame. */
+const ANCHOR_SPREAD = 0.62;
 const STRETCH = 0.9;       // webbing gives a little under load
 const ROPE_BEND = 0.35;    // second-neighbour stiffness (0 = rope, 1 = rod)
 
@@ -479,11 +481,13 @@ export default function Lanyard3D() {
     scene.add(rim);
 
     // ── Particles ───────────────────────────────────────────────────────────
-    // [0 .. ROPE_N)              rope, top to clip
-    // [ROPE_N .. ROPE_N + N)     card lattice, row-major from the top-left
+    // [0 .. ROPE_N)              left run of the strap, neck to clip
+    // [ROPE_N .. 2*ROPE_N)       right run
+    // [CARD0 .. CARD0 + N)       card lattice, row-major from the top-left
     // last                       the pointer, pinned, used only while dragging
     const N = CX * CY;
-    const PTR = ROPE_N + N;
+    const CARD0 = ROPE_N * 2;
+    const PTR = CARD0 + N;
     const P: Particle[] = [];
     const push = (x: number, y: number, z: number, w: number) =>
       P.push({ x, y, z, px: x, py: y, pz: z, w });
@@ -494,19 +498,30 @@ export default function Lanyard3D() {
     const LEAN = 0.18;
     const TWIST = 0.45;
 
-    const anchor = new THREE.Vector3(0, ANCHOR_Y, 0);
-    for (let i = 0; i < ROPE_N; i++) {
-      const t = i / (ROPE_N - 1);
-      push(anchor.x + t * LEAN, anchor.y - i * SEG, 0, i === 0 ? 0 : 1);
+    // A lanyard is a loop, not a string. It passes over the neck well above
+    // the frame and both runs converge on the clip, so the strap reads as an
+    // open V. One band dropped from a point reads as a luggage tag.
+    const ROPE_L = (ROPE_N - 1) * SEG;
+    const CLIP_Y =
+      ANCHOR_Y - Math.sqrt(Math.max(0.04, ROPE_L * ROPE_L - ANCHOR_SPREAD * ANCHOR_SPREAD));
+    const anchors = [
+      new THREE.Vector3(-ANCHOR_SPREAD, ANCHOR_Y, 0),
+      new THREE.Vector3(ANCHOR_SPREAD, ANCHOR_Y, 0),
+    ];
+    for (const a of anchors) {
+      for (let i = 0; i < ROPE_N; i++) {
+        const t = i / (ROPE_N - 1);
+        push(a.x - a.x * t + t * LEAN, a.y + (CLIP_Y - a.y) * t, 0, i === 0 ? 0 : 1);
+      }
     }
 
-    const ci = (i: number, j: number) => ROPE_N + j * CX + i;
+    const ci = (i: number, j: number) => CARD0 + j * CX + i;
     const DX = CARD_W / (CX - 1);
     const DY = CARD_H / (CY - 1);
     /** Rest offsets from the card's slot, used by the turn and by snapping. */
     const rx = new Float32Array(N);
     const ry = new Float32Array(N);
-    const topY = anchor.y - (ROPE_N - 1) * SEG - GAP;
+    const topY = CLIP_Y - GAP;
     for (let j = 0; j < CY; j++) {
       for (let i = 0; i < CX; i++) {
         const ox = -CARD_W / 2 + i * DX;
@@ -531,8 +546,15 @@ export default function Lanyard3D() {
       });
     };
 
-    for (let i = 0; i < ROPE_N - 1; i++) link(i, i + 1, STRETCH, SEG);
-    for (let i = 0; i < ROPE_N - 2; i++) link(i, i + 2, ROPE_BEND, SEG * 2);
+    for (let s = 0; s < 2; s++) {
+      const b = s * ROPE_N;
+      for (let i = 0; i < ROPE_N - 1; i++) link(b + i, b + i + 1, STRETCH, SEG);
+      for (let i = 0; i < ROPE_N - 2; i++) link(b + i, b + i + 2, ROPE_BEND, SEG * 2);
+    }
+
+    // The two runs meet. Rest length 0, so they are one point at the clip and
+    // the load from the card is shared back up both sides.
+    link(ROPE_N - 1, ROPE_N * 2 - 1, 1, 0);
 
     // The clip. One point of attachment, so the badge can swivel like a badge.
     link(ROPE_N - 1, ci((CX - 1) / 2, 0), 1, GAP);
@@ -659,39 +681,55 @@ export default function Lanyard3D() {
     };
     img.src = "/_static/me1.jpg";
 
-    // ── Band ────────────────────────────────────────────────────────────────
-    const curve = new THREE.CatmullRomCurve3(
-      Array.from({ length: ROPE_N }, () => new THREE.Vector3()),
-    );
-    curve.curveType = "chordal";
-
-    const bandGeo = new THREE.BufferGeometry();
-    const bpos = new Float32Array(BAND_N * 2 * 3);
-    const bnrm = new Float32Array(BAND_N * 2 * 3);
-    const buv = new Float32Array(BAND_N * 2 * 2);
-    const bidx: number[] = [];
-    for (let i = 0; i < BAND_N - 1; i++) {
-      const a = i * 2;
-      bidx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
-    }
-    bandGeo.setAttribute("position", new THREE.BufferAttribute(bpos, 3));
-    bandGeo.setAttribute("normal", new THREE.BufferAttribute(bnrm, 3));
-    bandGeo.setAttribute("uv", new THREE.BufferAttribute(buv, 2));
-    bandGeo.setIndex(bidx);
-
+    // ── Straps ──────────────────────────────────────────────────────────────
+    // Two of them, same webbing, built by the same factory. Each is its own
+    // Catmull-Rom ribbon so the two runs can twist independently - which they
+    // do, because the card turning drags one side forward and the other back.
     const bandTex = makeBandTexture();
-    const band = new THREE.Mesh(
-      bandGeo,
-      new THREE.MeshStandardMaterial({
-        map: bandTex,
-        side: THREE.DoubleSide,
-        roughness: 0.8,
-        metalness: 0.06,
-        envMapIntensity: 0.4,
-      }),
-    );
-    band.frustumCulled = false;
-    scene.add(band);
+    const bandMat = new THREE.MeshStandardMaterial({
+      map: bandTex,
+      side: THREE.DoubleSide,
+      roughness: 0.8,
+      metalness: 0.06,
+      envMapIntensity: 0.4,
+    });
+
+    interface Strap {
+      curve: THREE.CatmullRomCurve3;
+      geo: THREE.BufferGeometry;
+      pos: Float32Array;
+      nor: Float32Array;
+      uv: Float32Array;
+      mesh: THREE.Mesh;
+    }
+
+    const makeStrap = (): Strap => {
+      const curve = new THREE.CatmullRomCurve3(
+        Array.from({ length: ROPE_N }, () => new THREE.Vector3()),
+      );
+      curve.curveType = "chordal";
+
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(BAND_N * 2 * 3);
+      const nor = new Float32Array(BAND_N * 2 * 3);
+      const uv = new Float32Array(BAND_N * 2 * 2);
+      const ix: number[] = [];
+      for (let i = 0; i < BAND_N - 1; i++) {
+        const a = i * 2;
+        ix.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+      }
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
+      geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+      geo.setIndex(ix);
+
+      const mesh = new THREE.Mesh(geo, bandMat);
+      mesh.frustumCulled = false;
+      scene.add(mesh);
+      return { curve, geo, pos, nor, uv, mesh };
+    };
+
+    const straps: Strap[] = [makeStrap(), makeStrap()];
 
     // ── Clip ────────────────────────────────────────────────────────────────
     const clip = new THREE.Group();
@@ -726,7 +764,7 @@ export default function Lanyard3D() {
     const cardBasis = () => {
       cen.set(0, 0, 0);
       for (let k = 0; k < N; k++) {
-        const p = P[ROPE_N + k];
+        const p = P[CARD0 + k];
         cen.x += p.x; cen.y += p.y; cen.z += p.z;
       }
       cen.multiplyScalar(1 / N);
@@ -752,7 +790,7 @@ export default function Lanyard3D() {
       // in the requested orientation and zero its velocity.
       cardBasis();
       for (let k = 0; k < N; k++) {
-        const p = P[ROPE_N + k];
+        const p = P[CARD0 + k];
         p.x = cen.x + rx[k] * sgn;
         p.y = cen.y + ry[k] + CARD_H / 2;
         p.z = cen.z;
@@ -829,9 +867,9 @@ export default function Lanyard3D() {
         let best = -1;
         let bestD = Infinity;
         for (let k = 0; k < N; k++) {
-          const p = P[ROPE_N + k];
+          const p = P[CARD0 + k];
           const d = (p.x - hit.point.x) ** 2 + (p.y - hit.point.y) ** 2 + (p.z - hit.point.z) ** 2;
-          if (d < bestD) { bestD = d; best = ROPE_N + k; }
+          if (d < bestD) { bestD = d; best = CARD0 + k; }
         }
         const pp = P[PTR];
         pp.x = hit.point.x; pp.y = hit.point.y; pp.z = 0;
@@ -865,7 +903,7 @@ export default function Lanyard3D() {
         dragLink = null;
         // Keep a share of the drag velocity, so a release throws.
         for (let k = 0; k < N; k++) {
-          const p = P[ROPE_N + k];
+          const p = P[CARD0 + k];
           p.px = p.x - (p.x - p.px) * THROW;
           p.py = p.y - (p.y - p.py) * THROW;
           p.pz = p.z - (p.z - p.pz) * THROW;
@@ -968,7 +1006,7 @@ export default function Lanyard3D() {
           // Over the top. Brake, and let the facing pull land it.
           flipSteps = 0;
           for (let k = 0; k < N; k++) {
-            const p = P[ROPE_N + k];
+            const p = P[CARD0 + k];
             p.px = p.x - (p.x - p.px) * BRAKE;
             p.py = p.y - (p.y - p.py) * BRAKE;
             p.pz = p.z - (p.z - p.pz) * BRAKE;
@@ -977,7 +1015,7 @@ export default function Lanyard3D() {
           for (let k = 0; k < N; k++) {
             const s = Math.sign(rx[k]) * flipDir;
             if (!s) continue;
-            const p = P[ROPE_N + k];
+            const p = P[CARD0 + k];
             p.x += nrm.x * s * FLIP;
             p.y += nrm.y * s * FLIP;
             p.z += nrm.z * s * FLIP;
@@ -996,7 +1034,7 @@ export default function Lanyard3D() {
       qStep.copy(qId).slerp(qTo, k);
 
       for (let i = 0; i < N; i++) {
-        const p = P[ROPE_N + i];
+        const p = P[CARD0 + i];
         tmp.set(p.x - cen.x, p.y - cen.y, p.z - cen.z).applyQuaternion(qStep);
         p.x = cen.x + tmp.x;
         p.y = cen.y + tmp.y;
@@ -1005,7 +1043,11 @@ export default function Lanyard3D() {
     };
 
     const step = () => {
-      P[0].x = anchor.x; P[0].y = anchor.y; P[0].z = anchor.z;
+      for (let s2 = 0; s2 < 2; s2++) {
+        const a = anchors[s2];
+        const p = P[s2 * ROPE_N];
+        p.x = a.x; p.y = a.y; p.z = a.z;
+      }
       integrate();
       if (dragLink) {
         // The pointer particle approaches the cursor rather than teleporting
@@ -1046,7 +1088,7 @@ export default function Lanyard3D() {
 
       const h = CARD_T / 2;
       for (let k = 0; k < N; k++) {
-        const p = P[ROPE_N + k];
+        const p = P[CARD0 + k];
         const f = k * 3;
         const b = (N + k) * 3;
         vpos[f] = p.x + nx[k] * h;
@@ -1062,7 +1104,7 @@ export default function Lanyard3D() {
 
       for (let r = 0; r < R; r++) {
         const k = ring[r];
-        const p = P[ROPE_N + k];
+        const p = P[CARD0 + k];
         // Outward: away from the card centre, flattened into the card plane.
         tmp.set(p.x - cen.x, p.y - cen.y, p.z - cen.z);
         const dot = tmp.x * nx[k] + tmp.y * ny[k] + tmp.z * nz[k];
@@ -1084,25 +1126,26 @@ export default function Lanyard3D() {
       cardGeo.computeBoundingSphere();
     };
 
-    const buildBand = () => {
+    const buildStrap = (st: Strap, base: number) => {
       for (let i = 0; i < ROPE_N; i++) {
-        curve.points[i].set(P[i].x, P[i].y, P[i].z);
+        const p = P[base + i];
+        st.curve.points[i].set(p.x, p.y, p.z);
       }
 
       let arc = 0;
       for (let i = 0; i < BAND_N; i++) {
         const t = i / (BAND_N - 1);
-        curve.getPoint(t, pt);
-        curve.getPoint(Math.min(1, t + 0.01), nxt);
+        st.curve.getPoint(t, pt);
+        st.curve.getPoint(Math.min(1, t + 0.01), nxt);
         tan.subVectors(nxt, pt);
         if (tan.lengthSq() < 1e-12) tan.set(0, -1, 0); else tan.normalize();
         if (i > 0) arc += pt.distanceTo(prevPt);
         prevPt.copy(pt);
 
-        // The strap's own twist: flat to camera at the anchor, turning into
-        // the card's plane over the lower stretch. When the card turns over,
-        // the sign flips with it and the twist runs the other way, which is
-        // what sells the whole move.
+        // The strap's own twist: flat to camera at the neck, turning into the
+        // card's plane over the lower stretch. When the card turns over, the
+        // sign flips with it and the twist runs the other way, which is what
+        // sells the whole move.
         const a = THREE.MathUtils.smoothstep(t, 0.3, 1);
         const o = nrm.z < 0 ? -a : a;
         bn.copy(DEF_N).multiplyScalar(1 - a).addScaledVector(nrm, o);
@@ -1110,17 +1153,17 @@ export default function Lanyard3D() {
         if (bn.lengthSq() < 1e-12) bn.copy(DEF_N); else bn.normalize();
         side.crossVectors(tan, bn).normalize();
 
-        const s = i * 6;
+        const k = i * 6;
         const hw = BAND_W / 2;
-        bpos[s] = pt.x - side.x * hw;
-        bpos[s + 1] = pt.y - side.y * hw;
-        bpos[s + 2] = pt.z - side.z * hw;
-        bpos[s + 3] = pt.x + side.x * hw;
-        bpos[s + 4] = pt.y + side.y * hw;
-        bpos[s + 5] = pt.z + side.z * hw;
-        bnrm[s] = bnrm[s + 3] = bn.x;
-        bnrm[s + 1] = bnrm[s + 4] = bn.y;
-        bnrm[s + 2] = bnrm[s + 5] = bn.z;
+        st.pos[k] = pt.x - side.x * hw;
+        st.pos[k + 1] = pt.y - side.y * hw;
+        st.pos[k + 2] = pt.z - side.z * hw;
+        st.pos[k + 3] = pt.x + side.x * hw;
+        st.pos[k + 4] = pt.y + side.y * hw;
+        st.pos[k + 5] = pt.z + side.z * hw;
+        st.nor[k] = st.nor[k + 3] = bn.x;
+        st.nor[k + 1] = st.nor[k + 4] = bn.y;
+        st.nor[k + 2] = st.nor[k + 5] = bn.z;
 
         // UVs run off accumulated arc length, so the webbing print neither
         // stretches nor crawls as the strap takes up load.
@@ -1130,20 +1173,37 @@ export default function Lanyard3D() {
         // reflection, not a rotation, and the webbing print comes out
         // mirrored. This way round it is a clean quarter turn.
         const v = arc / (BAND_W * 4);
-        buv[i * 4] = v; buv[i * 4 + 1] = 1;
-        buv[i * 4 + 2] = v; buv[i * 4 + 3] = 0;
+        st.uv[i * 4] = v; st.uv[i * 4 + 1] = 1;
+        st.uv[i * 4 + 2] = v; st.uv[i * 4 + 3] = 0;
       }
-      bandGeo.attributes.position.needsUpdate = true;
-      bandGeo.attributes.normal.needsUpdate = true;
-      bandGeo.attributes.uv.needsUpdate = true;
+      st.geo.attributes.position.needsUpdate = true;
+      st.geo.attributes.normal.needsUpdate = true;
+      st.geo.attributes.uv.needsUpdate = true;
+    };
 
-      const last = P[ROPE_N - 1];
-      clip.position.set(last.x, last.y, last.z);
-      curve.getPoint(1, pt);
-      curve.getPoint(0.97, nxt);
-      tan.subVectors(pt, nxt);
-      if (tan.lengthSq() < 1e-12) tan.set(0, -1, 0); else tan.normalize();
-      upv.copy(tan).negate();
+    const buildStraps = () => {
+      buildStrap(straps[0], 0);
+      buildStrap(straps[1], ROPE_N);
+
+      // The clip sits where the two runs meet, and points back up the strap
+      // from the card's slot. Taking its axis from the card rather than from
+      // either curve's tangent keeps it steady: the two tangents disagree by
+      // the full angle of the V, so picking one made it twitch.
+      const endA = P[ROPE_N - 1];
+      const endB = P[ROPE_N * 2 - 1];
+      clip.position.set(
+        (endA.x + endB.x) / 2,
+        (endA.y + endB.y) / 2,
+        (endA.z + endB.z) / 2,
+      );
+
+      const slot = P[ci((CX - 1) / 2, 0)];
+      upv.set(
+        clip.position.x - slot.x,
+        clip.position.y - slot.y,
+        clip.position.z - slot.z,
+      );
+      if (upv.lengthSq() < 1e-12) upv.set(0, 1, 0); else upv.normalize();
       bn.copy(nrm).addScaledVector(upv, -nrm.dot(upv));
       if (bn.lengthSq() < 1e-12) bn.copy(DEF_N); else bn.normalize();
       side.crossVectors(upv, bn).normalize();
@@ -1172,7 +1232,7 @@ export default function Lanyard3D() {
       }
 
       buildCard();
-      buildBand();
+      buildStraps();
       renderer.render(scene, camera);
     };
 
@@ -1205,7 +1265,7 @@ export default function Lanyard3D() {
       // Frame the whole assembly when there is room. When there is not — a
       // short container on a phone — frame the card instead and let the strap
       // run off the top, rather than shrinking the badge to a stamp.
-      const bottom = anchor.y - (ROPE_N - 1) * SEG - GAP - CARD_H;
+      const bottom = CLIP_Y - GAP - CARD_H;
       const fit = (spanY: number, spanX: number, centreY: number) => {
         const z = Math.max(spanY / (2 * tanHalf), spanX / (2 * tanHalf * aspect)) * 1.01;
         camera.position.set(0, centreY, z);
@@ -1214,7 +1274,7 @@ export default function Lanyard3D() {
 
       // The strap runs off the top edge rather than floating below it, the
       // way it does when a pass is hung on something above the window.
-      const top = anchor.y + 0.06;
+      const top = ANCHOR_Y + 0.06;
       const bot = bottom - 0.3;
       let z = fit(top - bot, CARD_W * 1.3, (top + bot) / 2);
       const cardFrac = CARD_W / (2 * z * tanHalf * aspect);
@@ -1240,14 +1300,14 @@ export default function Lanyard3D() {
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
       cardGeo.dispose();
-      bandGeo.dispose();
+      straps.forEach((st) => { st.geo.dispose(); scene.remove(st.mesh); });
+      bandMat.dispose();
       bandTex.dispose();
       cardMats.forEach((m) => {
         const mm = m as THREE.MeshStandardMaterial;
         mm.map?.dispose();
         mm.dispose();
       });
-      (band.material as THREE.Material).dispose();
       metal.dispose();
       body.geometry.dispose();
       stem.geometry.dispose();

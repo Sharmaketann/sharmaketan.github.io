@@ -180,7 +180,7 @@ export default function Home() {
             {/* Social icons + Resume CTA */}
             <motion.div
               {...fadeUp(0.50)}
-              className="flex items-center gap-3 flex-wrap"
+              className="flex items-center gap-3 flex-wrap mb-5"
             >
               {SOCIALS.map((social) => (
                 <SocialLink
@@ -205,8 +205,12 @@ export default function Home() {
               </button>
             </motion.div>
 
-            {/* Availability badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            {/* Availability badge.
+                mb-8 matches the rhythm the rest of this column uses (mb-5
+                through mb-8). This block and the one above it had no bottom
+                margin at all, so the socials, the Resume button, the pill and
+                the Currently card were stacked flush against each other. */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 mb-8">
               <span className="relative flex h-2 w-2">
                 <span
                   className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"

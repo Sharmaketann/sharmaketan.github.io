@@ -52,12 +52,15 @@ export const PORTFOLIO_CONFIG = {
 
   // ── Social links ─────────────────────────────────────────────────────────
   socials: {
-    /** Used for the icon links on the home page */
     github: "https://github.com/sharmaketann",
-    x: "https://x.com/sharmaketann",
+    /**
+     * One handle, used everywhere. There used to be two - `x` for the icon
+     * links and `xProfile` for the footer - and they disagreed. The icon
+     * pointed at x.com/sharmaketann, which 404s; the footer had the live
+     * account. Single-valued so they cannot drift apart again.
+     */
+    x: "https://x.com/sharmaketan",
     linkedin: "https://www.linkedin.com/in/sharmaketann",
-    /** Used in the footer copyright link */
-    xProfile: "https://x.com/sharmaketan",
   },
 
   // ── Navigation ───────────────────────────────────────────────────────────

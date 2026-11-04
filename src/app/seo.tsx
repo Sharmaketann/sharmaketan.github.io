@@ -32,7 +32,7 @@ export function generatePageMetadata({
       description: desc,
       card: "summary_large_image",
       images: image ? [image] : [siteMetadata.socialBanner],
-      creator: "@sharmaketann",
+      creator: siteMetadata.xHandle,
     },
     ...rest,
   };

@@ -55,7 +55,7 @@ export async function generateMetadata({
       title: blog.title,
       description: blog.summary,
       images: [ogImage],
-      creator: "@sharmaketann",
+      creator: siteMetadata.xHandle,
     },
   };
 }

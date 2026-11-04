@@ -23,7 +23,7 @@ export function Header() {
   // z-30 keeps the nav and session clock above the hanging pass, which is a
   // fixed overlay at z-20. Chrome stays legible; the strap passes behind it.
   return (
-    <header className="relative z-30 py-6 mb-8 border-b border-gray-100 dark:border-zinc-800">
+    <header className="relative z-30 py-4 sm:py-6 mb-6 sm:mb-8 border-b border-gray-100 dark:border-zinc-800">
       <nav className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 
         {/* On small screens the logo and the toggle share the top row. */}
@@ -51,28 +51,40 @@ export function Header() {
         </div>
 
         {/* ── Nav links ────────────────────────────────────────── */}
-        {/* Scrollable on narrow screens so a seventh item never breaks it. */}
-        <ul className="flex items-center gap-[15px] sm:gap-6 md:gap-7 overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 sm:order-2">
+        {/* Wraps below sm, never scrolls. It used to be an overflow-x-auto
+            track with no-scrollbar, which hid "API" entirely at 360px - the
+            commonest Android width - with nothing on screen to suggest the
+            link was there. A row that wraps is always fully reachable; one
+            that scrolls without a scrollbar is a link you cannot find. */}
+        <ul className="flex flex-wrap items-center gap-x-4 gap-y-0.5 sm:flex-nowrap sm:gap-x-6 md:gap-x-7 sm:order-2">
           {NAV.map(({ path, name }) => {
             const active = path === "/" ? pathname === "/" : pathname.startsWith(path);
             return (
               <li key={path} className="shrink-0">
                 <Link
                   href={path}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative text-[13.5px] sm:text-sm pb-0.5 transition-colors whitespace-nowrap",
+                    // py-1.5 is the tap target, not decoration: the bare text
+                    // was a ~20px-tall hit area on a touch screen.
+                    "relative block py-1.5 text-[13.5px] sm:text-sm transition-colors whitespace-nowrap",
                     active
                       ? "text-gray-900 dark:text-gray-100 font-medium"
                       : "text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                   )}
                 >
-                  {name}
-                  {active && (
-                    <span
-                      className="absolute -bottom-[1px] left-0 w-full h-px"
-                      style={{ backgroundColor: "#c08a3e" }}
-                    />
-                  )}
+                  {/* The underline hangs off this span, so padding on the
+                      link can grow the tap area without dragging the rule
+                      away from the word. */}
+                  <span className="relative inline-block pb-0.5">
+                    {name}
+                    {active && (
+                      <span
+                        className="absolute -bottom-[1px] left-0 w-full h-px"
+                        style={{ backgroundColor: "#c08a3e" }}
+                      />
+                    )}
+                  </span>
                 </Link>
               </li>
             );

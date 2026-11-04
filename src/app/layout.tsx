@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     description: siteMetadata.description,
     card: "summary_large_image",
     images: [siteMetadata.socialBanner],
-    creator: "@sharmaketann",
+    creator: siteMetadata.xHandle,
   },
   alternates: {
     canonical: siteMetadata.siteUrl,

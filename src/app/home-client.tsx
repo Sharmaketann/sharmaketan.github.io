@@ -32,9 +32,12 @@ const FOCUS = [
   "Trading infrastructure, fintech & insurance technology",
 ];
 
+// Kept in step with the Currently card below. These two used to disagree:
+// the strip led with PostgreSQL and AWS while the card listed Python,
+// ClickHouse and Redis - the things actually in use.
 const TECH = [
-  "TypeScript", "React", "Next.js", "Node.js",
-  "MongoDB", "PostgreSQL", "Express", "AWS",
+  "TypeScript", "Node.js", "Python", "MongoDB",
+  "Redis", "ClickHouse", "WebSocket", "React", "Next.js",
 ];
 
 // ── What I'm working on right now ────────────────────────────────────────────
@@ -55,7 +58,7 @@ const JSON_LD = [
     name: "Sharma Ketan",
     url: PORTFOLIO_CONFIG.site.url,
     jobTitle: "Senior Backend Developer",
-    knowsAbout: ["TypeScript", "Node.js", "React", "Next.js", "MongoDB", "PostgreSQL", "AWS"],
+    knowsAbout: [...TECH],
     sameAs: [
       PORTFOLIO_CONFIG.socials.github,
       PORTFOLIO_CONFIG.socials.linkedin,
@@ -210,20 +213,31 @@ export default function Home() {
                 through mb-8). This block and the one above it had no bottom
                 margin at all, so the socials, the Resume button, the pill and
                 the Currently card were stacked flush against each other. */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 mb-8">
-              <span className="relative flex h-2 w-2">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: "#c08a3e" }}
-                />
-                <span
-                  className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: "#c08a3e" }}
-                />
-              </span>
-              <span className="text-[11px] text-gray-500 dark:text-gray-400 tracking-wide whitespace-nowrap">
-                Open to opportunities
-              </span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                <span className="relative flex h-2 w-2">
+                  <span
+                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                    style={{ backgroundColor: "#c08a3e" }}
+                  />
+                  <span
+                    className="relative inline-flex rounded-full h-2 w-2"
+                    style={{ backgroundColor: "#c08a3e" }}
+                  />
+                </span>
+                <span className="text-[11px] text-gray-500 dark:text-gray-400 tracking-wide whitespace-nowrap">
+                  Open to opportunities
+                </span>
+              </div>
+
+              {/* The pill claimed availability for months with no address
+                  anywhere on the site. This is the way to act on it. */}
+              <Link
+                href="/contact"
+                className="text-[11px] tracking-wide whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-[#c08a3e] dark:hover:text-[#c08a3e] transition-colors border-b border-gray-200 dark:border-zinc-700 hover:border-[#c08a3e] dark:hover:border-[#c08a3e] pb-px"
+              >
+                Get in touch &rarr;
+              </Link>
             </div>
 
             {/* ── Currently: what I'm actually building ── */}

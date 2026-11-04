@@ -1,0 +1,180 @@
+---
+title: "Loop Engineering: Designing the Thing That Prompts Your Agent"
+summary: "Prompt engineering tuned a single message. Loop engineering tunes the cycle — the goal test, the retry, the budget, the stop rule. The idea, plus a twenty-line example you can actually run."
+type: Blog
+publishedAt: 2026-10-06
+---
+
+<Image
+  src={"/_static/blogs/loop-engineering/thumbnail.svg"}
+  width={1280}
+  height={720}
+  alt="Loop engineering — designing the thing that prompts your agent"
+/>
+
+Nobody stands next to a radiator switching it on and off to hold a room at 21°C. You set a number on a thermostat and walk away. The thermostat reads the temperature, compares it against the target, and decides what happens next. That is a control loop, and we have been building them for about a century.
+
+Most people using coding agents are still standing next to the radiator.
+
+You send a prompt. You read what comes back. You decide whether it is any good. You type the next nudge. Twenty turns later you have a working feature and no memory of the last hour. The work got done, but it was paid for one decision at a time, and every one of those decisions came out of your attention.
+
+The shift people have started calling **loop engineering** is just the thermostat move applied to agents. Instead of judging each turn by hand, you write down the judgement once — as a goal, a test, a budget and a stop rule — and let the loop do the prompting.
+
+## What it actually means
+
+The cleanest definition I have read is from the [Second Brain OS handbook](https://secondbrainos.dev/#/read/track-loop/what-loop-engineering-is):
+
+> Loop engineering is the discipline of designing the control system that runs an agent: the thing that decides what to prompt, how to verify the result, whether to retry, and when to stop.
+
+Prompt engineering optimised a single message. Loop engineering optimises the cycle — who calls the model next, against what goal, judged by what test, under what budget.
+
+<Image
+  src={"/_static/blogs/loop-engineering/hand-vs-loop.svg"}
+  width={1280}
+  height={560}
+  alt="Prompt engineering keeps you inside the loop; loop engineering has you build the loop once"
+/>
+<p className="text-center text-xs text-gray-400 mt-1">The difference is where your attention goes, not how clever the prompt is</p>
+
+The important word in that definition is *verify*. Everything else in a loop is plumbing you could write in an afternoon. Deciding what counts as done, in a way a machine can check, is the actual work.
+
+## Where the name came from
+
+The term is young. It got its label in June 2026, when Peter Steinberger posted the line that named the shift — that you should not be prompting coding agents any more, you should be designing loops that prompt your agents. Addy Osmani's essay followed almost immediately and gave the idea an anatomy; O'Reilly Radar [syndicated it](https://www.oreilly.com/radar/loop-engineering/) later that month. Boris Cherny, who runs Claude Code at Anthropic, put it about as bluntly as it can be put: he does not prompt Claude any more, he has loops running that prompt Claude, and his job is to write loops.
+
+The practice is older than the name. Geoffrey Huntley's Ralph loop goes back to mid-2025, and Simon Willison was writing about designing agentic loops that September, defining an agent as something that runs tools in a loop to achieve a goal. June 2026 is just when it got a label.
+
+Treat the vocabulary as unstable. It is a few months old and still moving.
+
+## A loop you can actually run
+
+Theory is cheap here, so here is the smallest useful version. The task: a test suite is failing and you want it green.
+
+Start with the version almost everyone writes first:
+
+```bash
+while true; do
+  agent --prompt "fix the failing tests"
+done
+```
+
+This is not a loop, it is a leak. It never stops, nothing checks the work, and every attempt starts from the same blank stare. Run it overnight and you will wake up to a large bill and a test file that has been commented out.
+
+Now the real thing:
+
+```bash
+#!/usr/bin/env bash
+# fix-tests.sh — keep going until the suite is green, or until we run out of road.
+set -uo pipefail
+
+MAX_ATTEMPTS=6
+attempt=1
+
+while (( attempt <= MAX_ATTEMPTS )); do
+  echo "── attempt $attempt/$MAX_ATTEMPTS"
+
+  # The critic. A real command, a real exit code, run by something
+  # other than the agent that just edited the code.
+  if output=$(pnpm test 2>&1); then
+    echo "green on attempt $attempt"
+    exit 0
+  fi
+
+  # The retry. Hand back the failure, not the whole conversation.
+  failure=$(tail -n 60 <<< "$output")
+
+  agent --prompt "The test suite is failing. Fix the cause, not the test.
+
+$failure"
+
+  (( attempt++ ))
+done
+
+echo "gave up after $MAX_ATTEMPTS attempts — last failure above" >&2
+exit 1
+```
+
+Twenty lines. It is not sophisticated and it does not need to be, because the four things that matter are all in there.
+
+<Image
+  src={"/_static/blogs/loop-engineering/loop-anatomy.svg"}
+  width={1280}
+  height={660}
+  alt="Anatomy of a loop: goal, prompt, agent, critic, budget, and the feedback edge"
+/>
+
+## The four things that matter
+
+### Context hygiene
+
+That `tail -n 60` is doing more work than it looks like. The instinct is to hand the next attempt everything — the full output, the previous attempts, the reasoning. Resist it. A failing test suite prints hundreds of lines and maybe six of them matter. Pass the whole thing and you have buried the signal in your own noise, then paid for the privilege.
+
+Context hygiene is deciding what survives between attempts and what you deliberately throw away. Attempt four should see the current failure clearly. It usually should not see attempt two's dead end.
+
+### Stop conditions
+
+`MAX_ATTEMPTS=6` is not a performance tuning knob, it is a safety rail. Loops spin. The agent gets into a rut where it makes the same wrong change, sees the same failure, and makes the same wrong change again, forever, at roughly a rupee a turn.
+
+A budget can be attempts, tokens, or wall-clock time. Use whichever one you would actually regret blowing through, and make exhausting it loud. A loop that gives up quietly is worse than one that never ran.
+
+### A critic the agent cannot argue with
+
+This is the one people skip, and it is the one that makes the whole thing work.
+
+<Callout emoji="🔍">
+  "The agent says it is done" is a claim, not a condition. If your stop
+  condition is the agent's own report, you have not built a loop — you have
+  built a machine for generating confident-sounding claims at scale.
+</Callout>
+
+In the script above, the critic is `pnpm test`. It is a separate process. It has no idea what the agent intended, no stake in the answer, and it returns an integer. You cannot talk it into passing.
+
+Your critic does not have to be a test suite. It can be a type check, a linter, a schema validation, a diff against a golden file, a script that hits your staging API and asserts on the response. It just has to be something that runs, and fails, without the agent's cooperation.
+
+### Idempotent tools
+
+Anything a loop retries will eventually run twice. Not might — will. The agent will time out halfway through a tool call, the loop will retry, and the first call will land anyway.
+
+If you have written backend systems for money this is familiar ground, and the rules are the same ones. A retried "create invoice" must not create two invoices. Give the write an idempotency key and make the second call a no-op that returns the first result:
+
+```ts
+async function createInvoice(input: InvoiceInput, idempotencyKey: string) {
+  const existing = await db.invoices.findOne({ idempotencyKey });
+  if (existing) return existing;          // second call is a no-op
+
+  return db.invoices.insert({ ...input, idempotencyKey });
+}
+```
+
+The rule for agent tooling: every write the loop can reach has to be safe to repeat. Audit that before you let anything run unattended, because the loop will find the one endpoint you forgot.
+
+## A loop is not a harness
+
+These get mixed up constantly, and the distinction is worth holding on to.
+
+<Image
+  src={"/_static/blogs/loop-engineering/harness-vs-loop.svg"}
+  width={1280}
+  height={460}
+  alt="The harness executes one turn; the loop decides whether there should be a next one"
+/>
+
+The harness is the machinery around the model — the inner while-loop, tool schemas, permissions, context window management. It executes a turn.
+
+The loop is the control discipline on top. It decides whether there should be a next turn, what that turn attempts, who judges the result, and when the whole exercise ends.
+
+You need both, and they fail in different directions. A good harness with no loop discipline is a very fast way to produce unverified work. Loop discipline on a weak harness has nothing reliable to steer.
+
+## What this costs
+
+Worth saying plainly, because the enthusiastic write-ups tend to skip it: loops are more expensive than hand-prompting. Six attempts is six model calls plus six test runs, and you are paying for the five that failed. You are trading money for your attention, which is often a good trade and sometimes a terrible one.
+
+Loops are worth it where the goal is cheap to check and the work is annoying to do — failing tests, type errors, migrations, mechanical refactors across a lot of files. They are a bad fit where you cannot write the critic. If you cannot say what "done" looks like as a command, you do not have a loop problem, you have a specification problem, and no amount of retrying will fix it.
+
+## The actual shift
+
+Hand-prompting spends your judgement one turn at a time. Loop engineering spends it once, up front, on four artefacts: a goal expressed as an executable test, a retry policy that feeds failures back, a budget, and a stop rule.
+
+After that the loop does the prompting and you review outcomes instead of turns.
+
+The bottleneck moves from writing instructions to proving results — which, if you have been doing this long enough, is where it probably should have been all along.

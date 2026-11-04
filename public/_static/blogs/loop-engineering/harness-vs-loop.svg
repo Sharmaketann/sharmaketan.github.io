@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 460" width="1280" height="460">
+  <rect width="1280" height="460" fill="#0f0f11"/>
+
+  <text x="72" y="58" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="13"
+        fill="#71717a" letter-spacing="2">TWO DIFFERENT JOBS</text>
+
+  <!-- outer: loop -->
+  <rect x="72" y="86" width="1136" height="286" rx="14" fill="#c08a3e" fill-opacity="0.05"
+        stroke="#c08a3e" stroke-width="1.5" stroke-opacity="0.55"/>
+  <text x="100" y="118" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12"
+        fill="#c08a3e" letter-spacing="1.5">THE LOOP — control</text>
+  <text x="100" y="146" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="15" fill="#a1a1aa">Decides whether there should be a next turn, what it attempts, who judges it, and when to stop.</text>
+
+  <!-- inner: harness -->
+  <rect x="110" y="178" width="620" height="162" rx="12" fill="#18181b" stroke="#3f3f46" stroke-width="1.5"/>
+  <text x="134" y="210" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12"
+        fill="#71717a" letter-spacing="1.5">THE HARNESS — execution</text>
+  <text x="134" y="238" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="14" fill="#a1a1aa">Runs one turn: model call, tool schemas,</text>
+  <text x="134" y="260" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="14" fill="#a1a1aa">permissions, context window.</text>
+
+  <rect x="134" y="282" width="128" height="38" rx="8" fill="#0f0f11" stroke="#3f3f46" stroke-width="1"/>
+  <text x="198" y="306" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12"
+        fill="#a1a1aa" text-anchor="middle">model call</text>
+
+  <rect x="274" y="282" width="128" height="38" rx="8" fill="#0f0f11" stroke="#3f3f46" stroke-width="1"/>
+  <text x="338" y="306" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12"
+        fill="#a1a1aa" text-anchor="middle">tool calls</text>
+
+  <rect x="414" y="282" width="128" height="38" rx="8" fill="#0f0f11" stroke="#3f3f46" stroke-width="1"/>
+  <text x="478" y="306" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12"
+        fill="#a1a1aa" text-anchor="middle">permissions</text>
+
+  <rect x="554" y="282" width="152" height="38" rx="8" fill="#0f0f11" stroke="#3f3f46" stroke-width="1"/>
+  <text x="630" y="306" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12"
+        fill="#a1a1aa" text-anchor="middle">context window</text>
+
+  <!-- loop-only responsibilities, to the right of the harness box -->
+  <rect x="762" y="178" width="416" height="38" rx="8" fill="#0f0f11" stroke="#c08a3e"
+        stroke-width="1" stroke-opacity="0.45"/>
+  <text x="786" y="202" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#f4f4f5">Goal test — the command that decides "done"</text>
+
+  <rect x="762" y="226" width="416" height="38" rx="8" fill="#0f0f11" stroke="#c08a3e"
+        stroke-width="1" stroke-opacity="0.45"/>
+  <text x="786" y="250" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#f4f4f5">Retry policy — what the next attempt sees</text>
+
+  <rect x="762" y="274" width="416" height="38" rx="8" fill="#0f0f11" stroke="#c08a3e"
+        stroke-width="1" stroke-opacity="0.45"/>
+  <text x="786" y="298" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#f4f4f5">Budget — attempts, tokens, wall-clock</text>
+
+  <rect x="762" y="322" width="416" height="38" rx="8" fill="#0f0f11" stroke="#c08a3e"
+        stroke-width="1" stroke-opacity="0.45"/>
+  <text x="786" y="346" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#f4f4f5">Stop rule — green, broke, or out of road</text>
+
+  <!-- caption -->
+  <text x="72" y="412" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13.5" fill="#71717a">A good harness with no loop discipline is a fast way to produce unverified work. Loop discipline on a bad</text>
+  <text x="72" y="434" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13.5" fill="#71717a">harness has nothing reliable to steer. You need both, and they are not the same thing.</text>
+</svg>

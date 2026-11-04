@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <rect width="1280" height="720" fill="#0f0f11"/>
+
+  <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <circle cx="20" cy="20" r="1" fill="#ffffff" opacity="0.06"/>
+  </pattern>
+  <rect width="1280" height="720" fill="url(#dots)"/>
+
+  <defs>
+    <marker id="tipBrass" markerWidth="10" markerHeight="10" refX="6" refY="3.2" orient="auto">
+      <path d="M0,0 L6,3.2 L0,6.4 Z" fill="#c08a3e"/>
+    </marker>
+  </defs>
+
+  <!-- Decorative loop glyph -->
+  <g opacity="0.9">
+    <circle cx="975" cy="360" r="150" fill="none" stroke="#27272a" stroke-width="2"/>
+    <path d="M 975 210 A 150 150 0 1 1 846 285" fill="none" stroke="#c08a3e" stroke-width="3"
+          stroke-linecap="round" marker-end="url(#tipBrass)"/>
+    <circle cx="975" cy="210" r="7" fill="#c08a3e"/>
+    <circle cx="1125" cy="360" r="7" fill="#1fa97a"/>
+    <circle cx="975" cy="510" r="7" fill="#d9544d"/>
+
+    <text x="975" y="356" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="17"
+          fill="#71717a" text-anchor="middle">while (not done)</text>
+    <text x="975" y="384" font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="17"
+          fill="#71717a" text-anchor="middle">&amp;&amp; budget--</text>
+  </g>
+
+  <rect x="100" y="286" width="140" height="3" fill="#c08a3e" rx="2"/>
+
+  <text x="100" y="384" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="64" font-weight="700" fill="#f4f4f5" letter-spacing="-1.5">Loop</text>
+  <text x="100" y="458" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="64" font-weight="700" fill="#f4f4f5" letter-spacing="-1.5">Engineering</text>
+
+  <text x="100" y="516" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="22" fill="#71717a">Designing the thing that prompts your agent</text>
+
+  <rect x="100" y="560" width="112" height="32" rx="16" fill="#c08a3e" fill-opacity="0.15"
+        stroke="#c08a3e" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="156" y="581" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#c08a3e" text-anchor="middle">Agents</text>
+
+  <rect x="224" y="560" width="140" height="32" rx="16" fill="#c08a3e" fill-opacity="0.15"
+        stroke="#c08a3e" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="294" y="581" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#c08a3e" text-anchor="middle">Control loops</text>
+
+  <rect x="376" y="560" width="136" height="32" rx="16" fill="#c08a3e" fill-opacity="0.15"
+        stroke="#c08a3e" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="444" y="581" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        font-size="13" fill="#c08a3e" text-anchor="middle">Verification</text>
+</svg>

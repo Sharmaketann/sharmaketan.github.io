@@ -19,6 +19,7 @@ import { ThemeToggler } from "@/components/theme-toggle";
 import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
 import { allBlogs } from "contentlayer/generated";
 import { CommandK } from "@/components/command-k";
+import { SiteShell } from "@/components/site-shell";
 
 const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -117,7 +118,6 @@ export default function RootLayout({
           space_grotesk.className,
         )}
       >
-        <SiteBackdrop />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -185,22 +185,34 @@ export default function RootLayout({
               <Analytics />
             </main>
           ) : (
-            <main className="relative z-10 max-w-7xl mx-4 px-2 md:px-0 lg:mx-auto lg:px-6 flex flex-col justify-between min-h-screen">
-              {/* lg:px-6 is load bearing. Up to md the gutter comes from mx-4,
-                  and past ~1040px it comes from max-w-5xl leaving auto margins
-                  — but between those, at exactly lg, mx-auto cancels mx-4 and
-                  nothing replaces it, so the text ran edge to edge. 1024 CSS
-                  px is where a 1280 laptop at 125% scaling lands. */}
-              <div className="relative left-1/2 -translate-x-1/2 w-screen">
-                <TickerTape />
-              </div>
-              <Header />
+            /* The shell decides whether this route wears the terminal
+               chrome. /paper does not. */
+            <SiteShell
+              backdrop={<SiteBackdrop />}
+              chrome={
+                <>
+                  {/* lg:px-6 is load bearing. Up to md the gutter comes from
+                      mx-4, and past ~1040px from max-w-5xl leaving auto
+                      margins — but at exactly lg, mx-auto cancels mx-4 and
+                      nothing replaces it, so the text ran edge to edge. 1024
+                      CSS px is where a 1280 laptop at 125% scaling lands. */}
+                  <div className="relative left-1/2 -translate-x-1/2 w-screen">
+                    <TickerTape />
+                  </div>
+                  <Header />
+                </>
+              }
+              footer={
+                <>
+                  <Footer />
+                  <CommandK docs={paletteDocs} />
+                </>
+              }
+            >
               {children}
               <SpeedInsights />
               <Analytics />
-              <Footer />
-              <CommandK docs={paletteDocs} />
-            </main>
+            </SiteShell>
           )}
           <TailwindIndicator />
         </ThemeProvider>

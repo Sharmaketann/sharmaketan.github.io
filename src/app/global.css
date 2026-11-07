@@ -3,6 +3,27 @@
 @tailwind utilities;
 
 @layer base {
+  /* Command palette. Keyframes rather than an animation library: the
+     palette mounts on every route and is not worth the bundle. */
+  @keyframes ckFade {
+    from { opacity: 0 }
+    to   { opacity: 1 }
+  }
+  @keyframes ckRise {
+    from { opacity: 0; transform: translateY(10px) scale(.985) }
+    to   { opacity: 1; transform: translateY(0)    scale(1)    }
+  }
+  @keyframes ckRow {
+    from { opacity: 0; transform: translateY(3px) }
+    to   { opacity: 1; transform: translateY(0)   }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [class*="animate-[ck"], [style*="ckRow"] {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
   /* The ticker breaks out of the content column with 100vw, which is wider
      than the viewport by the scrollbar. Clip (not hidden) suppresses the
      resulting horizontal scrollbar without turning html into a scroll

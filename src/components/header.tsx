@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggler } from "./theme-toggle";
 import { MarketStatusPill } from "./market-status";
+import { CommandKTrigger } from "./command-k";
 
 const NAV = [
   { path: "/",             name: "Home"     },
@@ -46,6 +47,7 @@ export function Header() {
           <span className="hidden lg:inline-flex">
             <MarketStatusPill />
           </span>
+          <CommandKTrigger />
           <ThemeToggler />
         </div>
         </div>

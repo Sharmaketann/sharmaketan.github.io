@@ -17,6 +17,8 @@ import { ENV } from "@/lib/env";
 import { headers } from "next/headers";
 import { ThemeToggler } from "@/components/theme-toggle";
 import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
+import { allBlogs } from "contentlayer/generated";
+import { CommandK } from "@/components/command-k";
 
 const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -86,6 +88,13 @@ export default function RootLayout({
   const isCvSubdomain = host === "cv.sharmaketann.in" || host.startsWith("cv.sharmaketann.in:");
 
   const downloadUrl = PORTFOLIO_CONFIG.resume;
+
+  // Read here, in the server component, so the palette ships a plain array
+  // instead of pulling contentlayer into the client bundle.
+  const paletteDocs = allBlogs
+    .filter((b) => !b.draft)
+    .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
+    .map((b) => ({ title: b.title, slug: b.slug }));
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -190,6 +199,7 @@ export default function RootLayout({
               <SpeedInsights />
               <Analytics />
               <Footer />
+              <CommandK docs={paletteDocs} />
             </main>
           )}
           <TailwindIndicator />

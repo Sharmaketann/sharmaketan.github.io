@@ -1,7 +1,6 @@
 import { PORTFOLIO_CONFIG } from "@/data/portfolio.config";
 import { Arcade } from "./arcade";
 import { VisitCounter } from "./visit-counter";
-import { VersionSwitch } from "./version-switch";
 import Link from "next/link";
 
 export function Footer() {
@@ -10,7 +9,6 @@ export function Footer() {
       <Arcade />
       <div className="flex flex-col items-center gap-2.5 pt-6 pb-5">
         <VisitCounter />
-        <VersionSwitch to="paper" />
         <p className="text-gray-500 dark:text-gray-400 text-sm">
           © {new Date().getFullYear()}&nbsp;
           <a

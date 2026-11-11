@@ -238,6 +238,16 @@ export default function Home() {
               >
                 Get in touch &rarr;
               </Link>
+
+              {/* /desk is this same block on a full screen. Linked from here
+                  rather than only from the nav, so it reads as an expansion
+                  of the hero instead of a separate page someone has to find. */}
+              <Link
+                href="/desk"
+                className="text-[11px] tracking-wide whitespace-nowrap text-gray-500 dark:text-gray-400 hover:text-[#c08a3e] dark:hover:text-[#c08a3e] transition-colors border-b border-gray-200 dark:border-zinc-700 hover:border-[#c08a3e] dark:hover:border-[#c08a3e] pb-px"
+              >
+                See it full screen &rarr;
+              </Link>
             </div>
 
             {/* ── Currently: what I'm actually building ── */}

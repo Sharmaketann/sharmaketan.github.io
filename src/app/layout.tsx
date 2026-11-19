@@ -9,7 +9,7 @@ import { TickerTape } from "@/components/ticker-tape";
 import { SiteBackdrop } from "@/components/site-backdrop";
 import { Footer } from "@/components/footer";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Space_Grotesk } from "next/font/google";
+import { Space_Grotesk, Caveat } from "next/font/google";
 import { siteMetadata } from "@/data/siteMetadata";
 import Head from "./head";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -24,6 +24,16 @@ const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-space-grotesk",
+});
+
+// Handwriting, used only by the diagrams inside a couple of posts. Declared
+// here so the CSS variable exists site-wide; the font file itself is not
+// fetched until something actually renders with it, so every other page
+// pays a few bytes of @font-face CSS and nothing else.
+const caveat = Caveat({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-caveat",
 });
 
 export const metadata: Metadata = {
@@ -115,6 +125,7 @@ export default function RootLayout({
         className={cn(
           "min-h-screen overflow-x-clip antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
           space_grotesk.className,
+          caveat.variable,
         )}
       >
         <ThemeProvider

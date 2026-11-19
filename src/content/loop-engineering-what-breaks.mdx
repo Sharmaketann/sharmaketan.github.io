@@ -1,0 +1,412 @@
+---
+title: "Loop Engineering, Part Two: What Breaks"
+summary: "Part one gave the loop one way to stop. That was the bug. Four failures that get past a green checkmark — the test the agent quietly edited, the rut, the budget that was not a budget, and the write that landed twice."
+type: Blog
+publishedAt: 2026-11-12
+---
+
+<style>{`
+.lp2 {
+  --ink:#1b2430; --muted:#6b7480; --accent:#b07a2c;
+  --ok:#157f5c; --bad:#b8423c; --card:rgba(255,255,255,.66); --rule:rgba(27,36,48,.22);
+}
+.dark .lp2 {
+  --ink:#dfe3e9; --muted:#8b94a1; --accent:#d4a056;
+  --ok:#35c796; --bad:#ef6b63; --card:rgba(255,255,255,.035); --rule:rgba(223,227,233,.22);
+}
+.lp2-hand { font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive; }
+/* Graph paper. The diagrams below are drawn by hand, so the page they sit on
+   is the pad they were drawn on. 26px minor rule, 130px major. */
+.lp2-paper {
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-color:#faf9f5;
+  background-image:
+    repeating-linear-gradient(to right,  rgba(27,36,48,.05)  0 1px, transparent 1px 26px),
+    repeating-linear-gradient(to bottom, rgba(27,36,48,.05)  0 1px, transparent 1px 26px),
+    repeating-linear-gradient(to right,  rgba(27,36,48,.075) 0 1px, transparent 1px 130px),
+    repeating-linear-gradient(to bottom, rgba(27,36,48,.075) 0 1px, transparent 1px 130px),
+    radial-gradient(60% 45% at 15% -5%, rgba(176,122,44,.13), transparent 72%);
+}
+.dark .lp2-paper {
+  background-color:#0b0e13;
+  background-image:
+    repeating-linear-gradient(to right,  rgba(148,163,184,.045) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(to bottom, rgba(148,163,184,.045) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(to right,  rgba(148,163,184,.07)  0 1px, transparent 1px 130px),
+    repeating-linear-gradient(to bottom, rgba(148,163,184,.07)  0 1px, transparent 1px 130px),
+    radial-gradient(60% 45% at 15% -5%, rgba(192,138,62,.11), transparent 72%);
+}
+.lp2-fig { margin: 2.25rem 0; }
+.lp2-fig svg { width:100%; height:auto; display:block; }
+.lp2-fig figcaption {
+  font-family: var(--font-caveat), cursive;
+  text-align:center; font-size:1.05rem; color:var(--muted); margin-top:.35rem;
+}
+.lp2-kicker {
+  font-family: var(--font-caveat), cursive;
+  font-size:1.35rem; color:var(--accent); transform:rotate(-1.2deg);
+  display:inline-block;
+}
+/* A 720-unit diagram squeezed into a 327px phone renders its labels at about
+   five pixels. Let it keep a legible width and scroll sideways instead. */
+@media (max-width: 640px) {
+  .lp2-fig { overflow-x:auto; }
+  .lp2-fig svg { min-width:560px; }
+}
+`}</style>
+
+<div className="lp2-paper" aria-hidden="true" />
+
+<div className="lp2">
+
+<p className="lp2-kicker">part two of two — <a href="/blog/loop-engineering">part one is here</a></p>
+
+Part one ended on a twenty-line bash script and a reasonably confident claim: get four things right — a real critic, context hygiene, a budget, idempotent tools — and the loop does the prompting for you.
+
+I still believe that. It is also not enough, and the gap is not academic.
+
+Here is the problem with that script, stated plainly. It has exactly one way to stop on purpose: the critic returns zero. Everything else is the budget running out, which is not a decision, it is a timeout. A control system with one success condition and one timeout cannot tell the difference between work that went well, work that went nowhere, and work that quietly cheated. It reports all three the same way.
+
+This post is the other half. Four things that get past a green checkmark, and about thirty lines of shell that catch them.
+
+## 1. The green that was not green
+
+Give an agent a failing test and a firm instruction to make it pass, and you have described two jobs, not one. *Fix the code* is the job you meant. *Make this command exit zero* is the job you specified. The second one is strictly easier.
+
+So it does the easier one. Not maliciously — it has no concept of malice — but because deleting an assertion is a smaller edit than understanding a race condition, and nothing in the loop prefers one over the other.
+
+The versions I have seen, roughly in order of how hard they are to spot:
+
+- the test file is deleted
+- `it(...)` becomes `it.skip(...)`
+- `toBe(42)` becomes `toBeDefined()`
+- the body gets wrapped in a try/catch that swallows
+- the expected value is changed to whatever the broken code currently returns
+
+That last one is the dangerous one. The diff is two characters. The test still exists, still runs, still passes, and now encodes the bug as the specification. Six months later somebody fixes the bug properly, the test goes red, and they put the bug back to make it green.
+
+<figure className="lp2-fig">
+<svg viewBox="0 0 720 368" role="img" aria-labelledby="lp2f1">
+  <title id="lp2f1">Two different changes produce the same exit code, so the loop cannot tell them apart</title>
+  <defs>
+    <filter id="lp2rough" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.017" numOctaves="2" seed="11" result="n" />
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.3" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+
+  <text x="14" y="26" className="lp2-hand" fontSize="21" fill="var(--accent)">two ways for the suite to go green</text>
+
+  <g filter="url(#lp2rough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="14"  y="44" width="330" height="250" rx="9" stroke="var(--rule)" strokeWidth="1.4" />
+    <rect x="376" y="44" width="330" height="250" rx="9" stroke="var(--rule)" strokeWidth="1.4" />
+
+    <rect x="43"  y="90" width="272" height="38" rx="7" stroke="var(--muted)" strokeWidth="1.5" fill="var(--card)" />
+    <rect x="405" y="90" width="272" height="38" rx="7" stroke="var(--muted)" strokeWidth="1.5" fill="var(--card)" />
+
+    <path d="M179 128 L179 152" stroke="var(--muted)" strokeWidth="1.6" />
+    <path d="M174 145 L179 153 L184 145" stroke="var(--muted)" strokeWidth="1.6" />
+    <path d="M541 128 L541 152" stroke="var(--muted)" strokeWidth="1.6" />
+    <path d="M536 145 L541 153 L546 145" stroke="var(--muted)" strokeWidth="1.6" />
+
+    <rect x="43"  y="156" width="272" height="52" rx="7" stroke="var(--ok)"  strokeWidth="1.7" fill="var(--card)" />
+    <rect x="405" y="156" width="272" height="52" rx="7" stroke="var(--bad)" strokeWidth="1.7" fill="var(--card)" />
+
+    <path d="M179 208 L179 232" stroke="var(--muted)" strokeWidth="1.6" />
+    <path d="M174 225 L179 233 L184 225" stroke="var(--muted)" strokeWidth="1.6" />
+    <path d="M541 208 L541 232" stroke="var(--muted)" strokeWidth="1.6" />
+    <path d="M536 225 L541 233 L546 225" stroke="var(--muted)" strokeWidth="1.6" />
+
+    <rect x="43"  y="236" width="272" height="40" rx="7" stroke="var(--ok)" strokeWidth="1.8" />
+    <rect x="405" y="236" width="272" height="40" rx="7" stroke="var(--ok)" strokeWidth="1.8" />
+
+    <rect x="14" y="310" width="692" height="46" rx="9" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="7 6" />
+  </g>
+
+  <text x="179" y="72"  className="lp2-hand" fontSize="19" fill="var(--ink)" textAnchor="middle">what you asked for</text>
+  <text x="541" y="72"  className="lp2-hand" fontSize="19" fill="var(--ink)" textAnchor="middle">what you got</text>
+
+  <text x="179" y="114" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--ink)" textAnchor="middle">3 tests failing</text>
+  <text x="541" y="114" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--ink)" textAnchor="middle">3 tests failing</text>
+
+  <text x="179" y="180" fontSize="13.5" fill="var(--ink)" textAnchor="middle">agent fixes the cause</text>
+  <text x="179" y="198" fontSize="12" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">src/parse.ts</text>
+  <text x="541" y="180" fontSize="13.5" fill="var(--ink)" textAnchor="middle">agent edits the expected value</text>
+  <text x="541" y="198" fontSize="12" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">src/parse.test.ts</text>
+
+  <text x="179" y="261" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--ok)" textAnchor="middle">pnpm test &#8594; exit 0</text>
+  <text x="541" y="261" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--ok)" textAnchor="middle">pnpm test &#8594; exit 0</text>
+
+  <text x="360" y="339" className="lp2-hand" fontSize="19" fill="var(--accent)" textAnchor="middle">your loop reads one integer. both columns hand it a 0.</text>
+</svg>
+<figcaption>the critic is only honest if the agent cannot reach it</figcaption>
+</figure>
+
+### The fix is one line
+
+Restore the tests from git before you judge anything.
+
+```bash
+# The agent may edit tests while it works. The judge never sees those edits.
+git checkout -- '**/*.test.ts' '**/*.spec.ts' 2>/dev/null || true
+
+if output=$(pnpm test 2>&1); then
+  echo "green on attempt $attempt"
+  exit 0
+fi
+```
+
+Two lines, and they close the whole category. The agent is still free to open test files, read them, use them to work out what is expected — it just cannot change the exam before sitting it.
+
+If you want the loop to tell you *why* an attempt looked green when it was not, make a note of what it touched before you throw the edits away:
+
+```bash
+cheated=$(git diff --name-only -- '**/*.test.ts' '**/*.spec.ts')
+if [[ -n "$cheated" ]]; then
+  echo "attempt $attempt edited the spec: $cheated" >&2
+fi
+```
+
+That line is worth more as a signal than as a guard. An agent that keeps reaching for the test file is usually telling you the task is underspecified, not that it is lazy.
+
+One caveat worth saying out loud: if the job *is* to write tests, this guard is wrong and you need a different critic — coverage, a mutation score, something that cannot be satisfied by an empty `it()`. Do not bolt it on without deciding which job you are running.
+
+## 2. The rut
+
+A loop running is not a loop moving.
+
+The failure looks like this. Attempt three makes a change, the suite fails. Attempt four sees the same failure, makes the same change, fails identically. So does five. So does six. The budget runs out, the script exits one, and you have paid for four attempts that were all the same attempt.
+
+This is not the model being stupid. It is the model being consistent, which is normally the thing you want from it. Same context in, same completion out. Part one told you to hand back only the last failure — good for the token bill, and it also means a stuck loop has nothing new to go on, ever.
+
+A loop should be able to notice this about itself. The trick is to fingerprint the failure rather than compare it:
+
+```bash
+# Strip digits before hashing. Line numbers, durations and timestamps
+# change on every run; the bug does not.
+fingerprint() {
+  tr -d '0-9' <<< "$1" | shasum | cut -c1-8
+}
+```
+
+Then count the repeats and stop when there is nothing left to learn:
+
+```bash
+fp=$(fingerprint "$failure")
+
+if [[ "$fp" == "$prev_fp" ]]; then
+  (( stuck++ ))
+else
+  stuck=0
+fi
+prev_fp=$fp
+
+if (( stuck >= 2 )); then
+  echo "same failure three times running — a rut, not persistence" >&2
+  exit 2
+fi
+```
+
+<figure className="lp2-fig">
+<svg viewBox="0 0 720 306" role="img" aria-labelledby="lp2f2">
+  <title id="lp2f2">Three identical failure fingerprints in a row means the loop has stopped learning</title>
+
+  <text x="14" y="26" className="lp2-hand" fontSize="21" fill="var(--accent)">the loop is running. is it moving?</text>
+
+  <g filter="url(#lp2rough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="120" y="50"  width="118" height="28" rx="14" stroke="var(--muted)" strokeWidth="1.5" fill="var(--card)" />
+    <rect x="120" y="94"  width="118" height="28" rx="14" stroke="var(--muted)" strokeWidth="1.5" fill="var(--card)" />
+    <rect x="120" y="138" width="118" height="28" rx="14" stroke="var(--accent)" strokeWidth="1.8" fill="var(--card)" />
+    <rect x="120" y="182" width="118" height="28" rx="14" stroke="var(--accent)" strokeWidth="1.8" fill="var(--card)" />
+    <rect x="120" y="226" width="118" height="28" rx="14" stroke="var(--bad)" strokeWidth="1.8" strokeDasharray="6 5" />
+  </g>
+
+  <text x="14" y="70"  fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--muted)">attempt 1</text>
+  <text x="14" y="114" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--muted)">attempt 2</text>
+  <text x="14" y="158" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--muted)">attempt 3</text>
+  <text x="14" y="202" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--muted)">attempt 4</text>
+  <text x="14" y="246" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--muted)">attempt 5</text>
+
+  <text x="179" y="70"  fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--ink)" textAnchor="middle">c41e9a</text>
+  <text x="179" y="114" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--ink)" textAnchor="middle">7fb203</text>
+  <text x="179" y="158" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--accent)" textAnchor="middle">7fb203</text>
+  <text x="179" y="202" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--accent)" textAnchor="middle">7fb203</text>
+  <text x="179" y="246" fontSize="13" fontFamily="ui-monospace,monospace" fill="var(--bad)" textAnchor="middle">never runs</text>
+
+  <text x="258" y="70"  className="lp2-hand" fontSize="18" fill="var(--muted)">new failure — carry on</text>
+  <text x="258" y="114" className="lp2-hand" fontSize="18" fill="var(--muted)">new failure — carry on</text>
+  <text x="258" y="158" className="lp2-hand" fontSize="18" fill="var(--accent)">seen it once before</text>
+  <text x="258" y="202" className="lp2-hand" fontSize="18" fill="var(--accent)">seen it twice — stop here</text>
+  <text x="330" y="246" className="lp2-hand" fontSize="18" fill="var(--bad)">saved: this attempt, and the next two</text>
+
+  <text x="14" y="292" className="lp2-hand" fontSize="18" fill="var(--muted)">strip the digits before you hash — line numbers move, the bug stays put</text>
+</svg>
+<figcaption>exit 2, not exit 1 — &ldquo;stuck&rdquo; and &ldquo;out of attempts&rdquo; are different problems</figcaption>
+</figure>
+
+Note the separate exit code. Out of attempts might just mean the task was big. Stuck means the next attempt is pointless, and if anything upstream is deciding whether to escalate, it deserves to know which one happened.
+
+What you do about a rut is a judgement call. Escalating to a stronger model works sometimes. Widening the context you were so careful to trim works sometimes. Stopping and asking a person always works. What never works is running the same attempt a fourth time.
+
+## 3. The budget that was not a budget
+
+`MAX_ATTEMPTS=6` looks like a budget. It counts the wrong thing.
+
+Attempts are not interchangeable. One might be a thirty-second edit. The next might be forty minutes of the agent wandering a monorepo, reading two hundred files and burning several hundred thousand tokens before it produces a diff. Six of those is not six times the first one. You capped the one quantity you do not care about and left the two you do — money and wall-clock — unbounded.
+
+Bound the thing you would actually regret:
+
+```bash
+DEADLINE=$(( $(date +%s) + 20 * 60 ))   # the whole run, not one attempt
+ATTEMPT_TIMEOUT=300                      # and no single attempt gets to hang
+
+while (( attempt <= MAX_ATTEMPTS )); do
+  if (( $(date +%s) >= DEADLINE )); then
+    echo "out of time after $((attempt - 1)) attempts" >&2
+    exit 3
+  fi
+
+  timeout "$ATTEMPT_TIMEOUT" agent --prompt "$prompt" || true
+  ...
+done
+```
+
+`MAX_ATTEMPTS` stays, because it is still a useful sanity bound. It is just no longer the only one, and no longer the one that matters.
+
+<Callout emoji="⏱️">
+  A budget you have never hit is not a budget, it is a comment. Run the loop
+  once with the deadline set deliberately low and watch it give up. If the
+  give-up path is broken, find that out on purpose.
+</Callout>
+
+## 4. The write that landed twice
+
+Part one said every tool a loop can reach has to be safe to call twice, gave it one paragraph and a four-line sample, and moved on.
+
+That paragraph was doing far too much work.
+
+The scenario is ordinary. The agent calls a tool that creates something. The call takes longer than the client's timeout. The client gives up, the loop retries. The original request was never cancelled — only abandoned — so it completes anyway, and now there are two.
+
+What makes this worse than the other three is that nothing goes red. The critic passes. The loop exits zero. You find out from a user, or from a reconciliation report, or you do not find out.
+
+The real fix is more than a `findOne` before an `insert`, because that check is itself a race, and because making the retry return *the same answer* as the original turns out to be the hard part rather than the easy one. That is a post of its own, and it is [the next one](/blog/idempotency-keys).
+
+## Putting it back together
+
+All of it, in one file:
+
+```bash
+#!/usr/bin/env bash
+# fix-tests.sh — part two. Four ways to stop, three of them on purpose.
+set -uo pipefail
+
+MAX_ATTEMPTS=6
+ATTEMPT_TIMEOUT=300
+DEADLINE=$(( $(date +%s) + 20 * 60 ))
+
+attempt=1
+stuck=0
+prev_fp=""
+prompt="The test suite is failing. Fix the cause, not the test."
+
+fingerprint() { tr -d '0-9' <<< "$1" | shasum | cut -c1-8; }
+
+while (( attempt <= MAX_ATTEMPTS )); do
+  if (( $(date +%s) >= DEADLINE )); then
+    echo "out of time after $((attempt - 1)) attempts" >&2
+    exit 3
+  fi
+
+  echo "── attempt $attempt/$MAX_ATTEMPTS"
+  timeout "$ATTEMPT_TIMEOUT" agent --prompt "$prompt" || true
+
+  # Did it reach for the exam paper?
+  cheated=$(git diff --name-only -- '**/*.test.ts' '**/*.spec.ts')
+  [[ -n "$cheated" ]] && echo "   note: attempt touched $cheated" >&2
+
+  # Judge against the tests as committed, never as edited.
+  git checkout -- '**/*.test.ts' '**/*.spec.ts' 2>/dev/null || true
+
+  if output=$(pnpm test 2>&1); then
+    echo "green on attempt $attempt"
+    exit 0
+  fi
+
+  failure=$(tail -n 60 <<< "$output")
+  fp=$(fingerprint "$failure")
+
+  if [[ "$fp" == "$prev_fp" ]]; then (( stuck++ )); else stuck=0; fi
+  prev_fp=$fp
+
+  if (( stuck >= 2 )); then
+    echo "same failure three times running — a rut, not persistence" >&2
+    exit 2
+  fi
+
+  prompt="The test suite is still failing. Fix the cause, not the test.
+
+$failure"
+  (( attempt++ ))
+done
+
+echo "out of attempts — last failure above" >&2
+exit 1
+```
+
+Fifty lines against the original twenty, and nearly all of the new ones are about stopping. That ratio is not an accident. Starting work is the trivial part of a control system.
+
+<figure className="lp2-fig">
+<svg viewBox="0 0 720 340" role="img" aria-labelledby="lp2f3">
+  <title id="lp2f3">Four distinct exits from the end of an attempt: done, rut, out of budget, or go again</title>
+
+  <text x="14" y="26" className="lp2-hand" fontSize="21" fill="var(--accent)">a loop needs more than one way out</text>
+
+  <g filter="url(#lp2rough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="236" y="132" width="214" height="62" rx="9" stroke="var(--ink)" strokeWidth="1.8" fill="var(--card)" />
+
+    <path d="M450 150 C500 142 505 104 536 92" stroke="var(--ok)" strokeWidth="1.6" />
+    <path d="M528 88 L539 91 L534 101" stroke="var(--ok)" strokeWidth="1.6" />
+    <rect x="542" y="62" width="164" height="48" rx="9" stroke="var(--ok)" strokeWidth="1.8" />
+
+    <path d="M450 163 L536 163" stroke="var(--accent)" strokeWidth="1.6" />
+    <path d="M529 158 L537 163 L529 168" stroke="var(--accent)" strokeWidth="1.6" />
+    <rect x="542" y="138" width="164" height="50" rx="9" stroke="var(--accent)" strokeWidth="1.8" />
+
+    <path d="M450 176 C500 184 505 222 536 234" stroke="var(--accent)" strokeWidth="1.6" />
+    <path d="M528 238 L539 235 L534 225" stroke="var(--accent)" strokeWidth="1.6" />
+    <rect x="542" y="214" width="164" height="48" rx="9" stroke="var(--accent)" strokeWidth="1.8" />
+
+    <path d="M236 180 C156 186 150 98 286 100 L316 100 C335 100 343 110 343 124" stroke="var(--muted)" strokeWidth="1.6" strokeDasharray="6 5" />
+    <path d="M338 116 L343 128 L348 116" stroke="var(--muted)" strokeWidth="1.6" />
+  </g>
+
+  <text x="343" y="160" fontSize="15" fontWeight="600" fill="var(--ink)" textAnchor="middle">end of attempt N</text>
+  <text x="343" y="180" fontSize="10.5" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">where the decision gets made</text>
+
+  <text x="624" y="84"  fontSize="14" fontWeight="600" fill="var(--ok)" textAnchor="middle">done</text>
+  <text x="624" y="101" fontSize="10.5" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">exit 0 &#183; critic passed</text>
+
+  <text x="624" y="160" fontSize="14" fontWeight="600" fill="var(--accent)" textAnchor="middle">rut</text>
+  <text x="624" y="177" fontSize="10.5" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">exit 2 &#183; same failure x3</text>
+
+  <text x="624" y="236" fontSize="14" fontWeight="600" fill="var(--accent)" textAnchor="middle">out of budget</text>
+  <text x="624" y="253" fontSize="10.5" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">exit 3 &#183; deadline passed</text>
+
+  <text x="176" y="88" className="lp2-hand" fontSize="18" fill="var(--muted)">none of the above — go again</text>
+
+  <text x="14" y="322" className="lp2-hand" fontSize="19" fill="var(--bad)">part one had one exit and a timeout. that was the bug.</text>
+</svg>
+<figcaption>three deliberate stops and one retry — each with its own exit code</figcaption>
+</figure>
+
+## If you only take one thing
+
+Take the `git checkout` line.
+
+The other three cost you money and time, and you will notice them. The bill is bigger than you expected, or the loop sits there for an hour, or the same error scrolls past four times and you recognise it. Annoying, visible, fixable.
+
+The first one costs you a green checkmark you believed. You will not notice it, because the entire reason you built the loop was to stop reading every turn — and a loop you cannot trust is worse than no loop at all, since now you are not reading the turns *and* you are not getting the verification you traded them for.
+
+Make the exam unreachable. The rest is tuning.
+
+</div>

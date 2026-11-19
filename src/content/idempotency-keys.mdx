@@ -1,0 +1,443 @@
+---
+title: "Idempotency Keys for Endpoints That Move Money"
+summary: "A retry you did not ask for is still a request. How to make the second one a no-op that returns the first one's answer — the unique index, the stored response, the in-flight case, and the client bug that quietly undoes all of it."
+type: Blog
+publishedAt: 2026-11-19
+---
+
+<style>{`
+.idem {
+  --ink:#241f17; --muted:#6f6454; --accent:#9a6b1f;
+  --ok:#1a6f4f; --bad:#a93b35; --card:rgba(255,255,255,.72); --rule:rgba(36,31,23,.26);
+}
+.dark .idem {
+  --ink:#e6e1d6; --muted:#9a9382; --accent:#d4a056;
+  --ok:#35c796; --bad:#ef6b63; --card:rgba(255,255,255,.035); --rule:rgba(230,225,214,.24);
+}
+.idem-hand { font-family: var(--font-caveat), "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive; }
+/* Ledger paper: ruled lines and a double margin rule down the left.
+   Different pad from the last post on purpose — that one was a notebook
+   about control flow, this one is an account book about money. */
+.idem-paper {
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-color:#fbf8f0;
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 27px, rgba(120,92,40,.11) 27px 28px),
+    radial-gradient(65% 45% at 88% -8%, rgba(154,107,31,.13), transparent 72%);
+}
+.dark .idem-paper {
+  background-color:#0b0d11;
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 27px, rgba(148,163,184,.05) 27px 28px),
+    radial-gradient(65% 45% at 88% -8%, rgba(192,138,62,.10), transparent 72%);
+}
+@media (min-width: 1340px) {
+  .idem-paper::before {
+    content:""; position:absolute; top:0; bottom:0;
+    left:calc(50% - 616px); width:1px;
+    background:rgba(169,59,53,.32); box-shadow:3px 0 0 rgba(169,59,53,.16);
+  }
+  .dark .idem-paper::before {
+    background:rgba(192,138,62,.30); box-shadow:3px 0 0 rgba(192,138,62,.14);
+  }
+}
+.idem-fig { margin: 2.25rem 0; }
+.idem-fig svg { width:100%; height:auto; display:block; }
+.idem-fig figcaption {
+  font-family: var(--font-caveat), cursive;
+  text-align:center; font-size:1.05rem; color:var(--muted); margin-top:.35rem;
+}
+.idem-kicker {
+  font-family: var(--font-caveat), cursive;
+  font-size:1.35rem; color:var(--accent); transform:rotate(-1deg); display:inline-block;
+}
+/* A 720-unit diagram squeezed into a 327px phone renders its labels at about
+   five pixels. Let it keep a legible width and scroll sideways instead. */
+@media (max-width: 640px) {
+  .idem-fig { overflow-x:auto; }
+  .idem-fig svg { min-width:560px; }
+}
+`}</style>
+
+<div className="idem-paper" aria-hidden="true" />
+
+<div className="idem">
+
+<p className="idem-kicker">a loose end from <a href="/blog/loop-engineering-what-breaks">last week's post</a></p>
+
+Somebody taps Pay. The phone sends the request, waits ten seconds, hears nothing, and gives up. The app retries — politely, automatically, exactly as it was designed to.
+
+Two charges. One order.
+
+The thing worth sitting with is that nobody did anything wrong. The phone was right to retry: it genuinely did not know whether the first request landed. The server was right to process the second request: it was a valid, authenticated, well-formed request to take some money. The network did what networks do. Every component behaved correctly and the customer is out twice the amount.
+
+<figure className="idem-fig">
+<svg viewBox="0 0 720 312" role="img" aria-labelledby="idf1">
+  <title id="idf1">A client timeout causes a retry, and the original request completes anyway, charging twice</title>
+  <defs>
+    <filter id="idrough" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="5" result="n" />
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+
+  <text x="14" y="24" className="idem-hand" fontSize="21" fill="var(--accent)">nobody did anything wrong</text>
+
+  <g filter="url(#idrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M96 78 L706 78"  stroke="var(--rule)" strokeWidth="1.3" strokeDasharray="5 6" />
+    <path d="M96 214 L706 214" stroke="var(--rule)" strokeWidth="1.3" strokeDasharray="5 6" />
+
+    <path d="M150 86 L254 200" stroke="var(--ink)" strokeWidth="1.6" />
+    <path d="M246 190 L256 202 L242 203" stroke="var(--ink)" strokeWidth="1.6" />
+
+    <rect x="258" y="196" width="128" height="36" rx="7" stroke="var(--ok)" strokeWidth="1.7" fill="var(--card)" />
+
+    <path d="M300 70 L318 86 M318 70 L300 86" stroke="var(--bad)" strokeWidth="2" />
+
+    <path d="M470 86 L560 200" stroke="var(--bad)" strokeWidth="1.6" />
+    <path d="M552 190 L562 202 L548 203" stroke="var(--bad)" strokeWidth="1.6" />
+
+    <rect x="564" y="196" width="128" height="36" rx="7" stroke="var(--bad)" strokeWidth="1.7" fill="var(--card)" />
+
+    <path d="M344 194 L374 92" stroke="var(--muted)" strokeWidth="1.4" strokeDasharray="4 5" />
+    <path d="M366 94 L376 88 L377 100" stroke="var(--muted)" strokeWidth="1.4" />
+
+    <rect x="14" y="258" width="692" height="44" rx="9" stroke="var(--bad)" strokeWidth="1.5" strokeDasharray="7 6" />
+  </g>
+
+  <text x="14" y="72"  className="idem-hand" fontSize="19" fill="var(--muted)">phone</text>
+  <text x="14" y="208" className="idem-hand" fontSize="19" fill="var(--muted)">server</text>
+
+  <text x="112" y="104" fontSize="12" fontFamily="ui-monospace,monospace" fill="var(--ink)">POST /payments</text>
+  <text x="112" y="120" fontSize="12" fontFamily="ui-monospace,monospace" fill="var(--muted)">2,400</text>
+
+  <text x="309" y="56" className="idem-hand" fontSize="18" fill="var(--bad)" textAnchor="middle">gave up at 10s</text>
+
+  <text x="440" y="104" fontSize="12" fontFamily="ui-monospace,monospace" fill="var(--bad)">POST /payments</text>
+  <text x="440" y="120" fontSize="12" fontFamily="ui-monospace,monospace" fill="var(--muted)">2,400 (retry)</text>
+
+  <text x="322" y="219" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--ok)"  textAnchor="middle">charge ok</text>
+  <text x="628" y="219" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--bad)" textAnchor="middle">charge ok</text>
+
+  <text x="384" y="150" className="idem-hand" fontSize="17" fill="var(--muted)">201, too late</text>
+
+  <text x="360" y="286" className="idem-hand" fontSize="19" fill="var(--bad)" textAnchor="middle">two charges, one order, and nothing in the logs looks like an error</text>
+</svg>
+<figcaption>the first request was never cancelled — only abandoned</figcaption>
+</figure>
+
+## What idempotent actually means
+
+Doing it twice leaves the world in the same state as doing it once.
+
+Some of HTTP is already there by construction. `GET` changes nothing. `PUT /users/7` with a full body sets the same fields to the same values no matter how many times it arrives. `DELETE /orders/4` removes the order and then has nothing left to remove.
+
+`POST /payments` is the opposite. Its whole job is to create something new each time it is called. That is not a flaw to be designed away — it is what the endpoint is for. So you cannot make it naturally idempotent. You have to give the caller a way to say *this is the same request I sent you a moment ago*, and that is all an idempotency key is: a string, chosen by the client, that names one logical operation.
+
+```http
+POST /v1/payments HTTP/1.1
+Idempotency-Key: 9f2a1c84-6d3e-4b70-9f21-0ac41b8e5d12
+Content-Type: application/json
+
+{ "order_id": 50912, "amount": 240000, "currency": "INR" }
+```
+
+Same key arriving twice means: you already have this one, give me back what you gave me the first time.
+
+## The obvious fix has a hole in it
+
+Almost everyone writes this first:
+
+```ts
+// Don't ship this.
+async function createPayment(input: PaymentInput, key: string) {
+  const existing = await db.payments.findOne({ idempotencyKey: key });
+  if (existing) return existing;
+
+  return db.payments.insert({ ...input, idempotencyKey: key });
+}
+```
+
+It reads fine. It is wrong, and it is wrong in exactly the situation it was written for.
+
+Two retries of the same request can be in flight at the same time — that is the normal case, not the exotic one, because the client retried precisely because the first one was slow. Both run the `findOne`. Both find nothing, because neither has inserted yet. Both insert.
+
+The check and the write are two separate round trips, and anything can happen in the gap between them.
+
+<figure className="idem-fig">
+<svg viewBox="0 0 720 312" role="img" aria-labelledby="idf2">
+  <title id="idf2">Two concurrent workers both read an empty table before either writes, so both insert</title>
+
+  <text x="14" y="24" className="idem-hand" fontSize="21" fill="var(--accent)">check-then-insert, with the clock running</text>
+
+  <g filter="url(#idrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M360 56 L360 268" stroke="var(--rule)" strokeWidth="1.3" strokeDasharray="4 6" />
+
+    <rect x="22"  y="76"  width="258" height="36" rx="7" stroke="var(--muted)" strokeWidth="1.6" fill="var(--card)" />
+    <rect x="440" y="124" width="258" height="36" rx="7" stroke="var(--muted)" strokeWidth="1.6" fill="var(--card)" />
+    <rect x="22"  y="180" width="258" height="36" rx="7" stroke="var(--ok)"  strokeWidth="1.7" fill="var(--card)" />
+    <rect x="440" y="228" width="258" height="36" rx="7" stroke="var(--bad)" strokeWidth="1.7" fill="var(--card)" />
+
+    <path d="M336 96 L336 198" stroke="var(--bad)" strokeWidth="1.6" />
+    <path d="M331 104 L336 94 L341 104" stroke="var(--bad)" strokeWidth="1.6" />
+    <path d="M331 190 L336 200 L341 190" stroke="var(--bad)" strokeWidth="1.6" />
+  </g>
+
+  <text x="22"  y="66"  className="idem-hand" fontSize="19" fill="var(--muted)">retry A</text>
+  <text x="440" y="114" className="idem-hand" fontSize="19" fill="var(--muted)">retry B</text>
+
+  <text x="151" y="99"  fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--ink)" textAnchor="middle">SELECT … WHERE key = k</text>
+  <text x="569" y="147" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--ink)" textAnchor="middle">SELECT … WHERE key = k</text>
+  <text x="151" y="203" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--ok)"  textAnchor="middle">INSERT → charge</text>
+  <text x="569" y="251" fontSize="12.5" fontFamily="ui-monospace,monospace" fill="var(--bad)" textAnchor="middle">INSERT → charge again</text>
+
+  <text x="372" y="152" className="idem-hand" fontSize="18" fill="var(--bad)">both read</text>
+  <text x="372" y="172" className="idem-hand" fontSize="18" fill="var(--bad)">an empty table</text>
+
+  <text x="14" y="296" className="idem-hand" fontSize="19" fill="var(--muted)">a few milliseconds wide, and it opens every single time the client retries</text>
+</svg>
+<figcaption>a read and a write are not a decision — they are two things with a gap in between</figcaption>
+</figure>
+
+## Let the database decide
+
+Stop asking whether the key exists. Try to claim it, and let a unique index settle the argument. Exactly one writer can win, the loser finds out by getting an error, and there is no window because the index check and the write are the same operation.
+
+```sql
+CREATE TABLE idempotency_keys (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id       BIGINT       NOT NULL,
+  endpoint      VARCHAR(120) NOT NULL,
+  idem_key      VARCHAR(255) NOT NULL,
+  request_hash  CHAR(64)     NOT NULL,
+  state         ENUM('in_flight','completed') NOT NULL DEFAULT 'in_flight',
+  status_code   SMALLINT     NULL,
+  response_body JSON         NULL,
+  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at    TIMESTAMP    NOT NULL,
+
+  UNIQUE KEY uq_claim (user_id, endpoint, idem_key)
+);
+```
+
+Three columns in that unique key, and each one is load bearing.
+
+`user_id` scopes the key to the person who sent it. Without it, two customers who both send `retry-1` collide, and the second one is handed the first one's payment receipt. Keys are chosen by clients, so you must assume they are guessable, repeated, and occasionally just the string `test`.
+
+`endpoint` stops a key reused across two different operations from matching. The same mobile app sending `abc` to `/payments` and to `/refunds` means two different things.
+
+`idem_key` is the client's string.
+
+## Store the answer, not the fact
+
+Here is the part that gets skipped, and it is the part that decides whether any of this actually helps the customer.
+
+Knowing the request already happened is not enough. The retry is still sitting there waiting for a response, and it needs *the same response* — the same body, the same status code, the same payment id. If the duplicate gets a bare `409 Conflict`, you have prevented the double charge and still broken the client, which is now looking at an error for a payment that succeeded.
+
+So `response_body` and `status_code` are columns. On a replay you return what you stored, byte for byte, and tell the caller that is what you did:
+
+```
+HTTP/1.1 201 Created
+Idempotent-Replay: true
+```
+
+That header is not decoration. It is how someone reading a support ticket at two in the morning works out whether they are looking at one payment or two.
+
+## Three things a duplicate can mean
+
+Once the claim fails, you load the existing row, and there are exactly three cases.
+
+**Same key, same body, already finished.** Replay the stored response. This is the happy path and the whole point of the exercise.
+
+**Same key, different body.** Refuse it. Someone has reused a key for a different operation — almost always a client bug, occasionally something worse — and the one thing you must not do is guess which of the two requests they meant. Compare a hash of the body and return `422`:
+
+```ts
+const requestHash = sha256(canonicalJson(req.body));
+```
+
+Note `canonicalJson`, not `JSON.stringify`. Two clients can send the same fields in a different order and `JSON.stringify` will hash them differently, so you would reject a legitimate retry. Sort the keys before hashing, recursively, and decide what you do about floats before you find out the hard way.
+
+**Same key, same body, still running.** The first request has not finished yet. Do not run the work again, and do not block holding a connection open either:
+
+```
+HTTP/1.1 409 Conflict
+Retry-After: 2
+```
+
+<figure className="idem-fig">
+<svg viewBox="0 0 720 292" role="img" aria-labelledby="idf3">
+  <title id="idf3">Lifecycle of an idempotency key from claimed, through in flight, to completed and expired</title>
+
+  <text x="14" y="24" className="idem-hand" fontSize="21" fill="var(--accent)">one key, four states, no guessing</text>
+
+  <g filter="url(#idrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="14"  y="92" width="150" height="54" rx="9" stroke="var(--muted)" strokeWidth="1.6" fill="var(--card)" />
+    <rect x="252" y="92" width="170" height="54" rx="9" stroke="var(--accent)" strokeWidth="1.8" fill="var(--card)" />
+    <rect x="520" y="92" width="186" height="54" rx="9" stroke="var(--ok)" strokeWidth="1.8" fill="var(--card)" />
+    <rect x="520" y="204" width="186" height="46" rx="9" stroke="var(--rule)" strokeWidth="1.5" strokeDasharray="6 5" />
+
+    <path d="M164 119 L244 119" stroke="var(--ink)" strokeWidth="1.6" />
+    <path d="M237 114 L245 119 L237 124" stroke="var(--ink)" strokeWidth="1.6" />
+    <path d="M422 119 L512 119" stroke="var(--ink)" strokeWidth="1.6" />
+    <path d="M505 114 L513 119 L505 124" stroke="var(--ink)" strokeWidth="1.6" />
+    <path d="M613 146 L613 196" stroke="var(--rule)" strokeWidth="1.5" strokeDasharray="5 5" />
+    <path d="M608 188 L613 198 L618 188" stroke="var(--rule)" strokeWidth="1.5" />
+
+    <path d="M337 146 L337 182" stroke="var(--bad)" strokeWidth="1.5" />
+    <path d="M332 174 L337 184 L342 174" stroke="var(--bad)" strokeWidth="1.5" />
+  </g>
+
+  <text x="89"  y="117" fontSize="13.5" fontWeight="600" fill="var(--ink)" textAnchor="middle">claim</text>
+  <text x="89"  y="134" fontSize="11" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">INSERT</text>
+
+  <text x="337" y="117" fontSize="13.5" fontWeight="600" fill="var(--accent)" textAnchor="middle">in_flight</text>
+  <text x="337" y="134" fontSize="11" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">work is running</text>
+
+  <text x="613" y="117" fontSize="13.5" fontWeight="600" fill="var(--ok)" textAnchor="middle">completed</text>
+  <text x="613" y="134" fontSize="11" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">status + body stored</text>
+
+  <text x="613" y="226" fontSize="13" fontWeight="600" fill="var(--muted)" textAnchor="middle">expired</text>
+  <text x="613" y="242" fontSize="11" fontFamily="ui-monospace,monospace" fill="var(--muted)" textAnchor="middle">after 24h, row is gone</text>
+
+  <text x="186" y="80" className="idem-hand" fontSize="17" fill="var(--muted)">the index picks a winner</text>
+  <text x="430" y="80" className="idem-hand" fontSize="17" fill="var(--muted)">same txn as the work</text>
+
+  <text x="348" y="180" className="idem-hand" fontSize="17" fill="var(--bad)">duplicate here &#8594; 409, Retry-After: 2</text>
+  <text x="348" y="202" className="idem-hand" fontSize="17" fill="var(--ok)">duplicate after &#8594; replay the stored response</text>
+
+  <text x="14" y="276" className="idem-hand" fontSize="18" fill="var(--muted)">a key stuck in_flight blocks its own retries — give the claim a lease</text>
+</svg>
+<figcaption>the in-flight state is the one people leave out, and it is the one retries actually hit</figcaption>
+</figure>
+
+### The stuck key
+
+That `in_flight` state has a trap in it. If the process handling the first request dies — deploy, OOM, pod evicted — the row sits there forever, and every retry of that payment gets `409` until the end of time. You have replaced a double charge with a payment that can never be made.
+
+Treat the claim as a lease rather than a lock. If a row has been `in_flight` for longer than any sane request could run, let the next caller take it over:
+
+```sql
+UPDATE idempotency_keys
+   SET created_at = NOW()
+ WHERE user_id = ? AND endpoint = ? AND idem_key = ?
+   AND state = 'in_flight'
+   AND created_at < NOW() - INTERVAL 2 MINUTE;
+```
+
+If that updates one row, you own the claim and can proceed. If it updates zero, somebody else is legitimately still working and `409` is the right answer.
+
+Pick the lease window from your actual p99, not from a round number you like.
+
+## The client bug that undoes everything
+
+All of the above is wasted if the key is generated in the wrong place. This is the single most common way idempotency gets implemented and still does not work:
+
+```ts
+// Wrong. A fresh key on every attempt means every attempt is a new operation,
+// and the server has no way to know they were ever related.
+await retry(() =>
+  fetch("/v1/payments", {
+    method: "POST",
+    headers: { "Idempotency-Key": crypto.randomUUID() },
+    body,
+  }),
+);
+```
+
+The key belongs to the operation, not to the attempt. Generate it once, before the first try, and reuse it for every retry of that same intent:
+
+```ts
+const idempotencyKey = crypto.randomUUID();
+
+await retry(() =>
+  fetch("/v1/payments", {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body,
+  }),
+);
+```
+
+Two lines apart in the source, and the difference between a system that deduplicates and one that has an expensive header.
+
+If the user can trigger the operation again by tapping the button a second time, that is a different question and a different fix — the key should then be derived from something stable about the intent, like the cart or the order id, so a double tap is also caught.
+
+## Wiring it into NestJS
+
+This is interceptor-shaped work — it wraps the handler, it needs the request before and the response after, and it has nothing to do with payments specifically.
+
+```ts
+@Injectable()
+export class IdempotencyInterceptor implements NestInterceptor {
+  constructor(private readonly store: IdempotencyStore) {}
+
+  async intercept(ctx: ExecutionContext, next: CallHandler) {
+    const http = ctx.switchToHttp();
+    const req = http.getRequest();
+    const key = req.header("Idempotency-Key");
+
+    if (!key) {
+      throw new BadRequestException("Idempotency-Key header is required");
+    }
+
+    const scope = {
+      userId: req.user.id,
+      endpoint: `${req.method} ${req.route.path}`,
+      key,
+      requestHash: sha256(canonicalJson(req.body)),
+    };
+
+    const claim = await this.store.claim(scope);
+
+    if (claim.kind === "replay") {
+      http.getResponse().status(claim.statusCode).set("Idempotent-Replay", "true");
+      return of(claim.body);
+    }
+    if (claim.kind === "in_flight") {
+      http.getResponse().set("Retry-After", "2");
+      throw new ConflictException("This request is still being processed");
+    }
+    if (claim.kind === "mismatch") {
+      throw new UnprocessableEntityException(
+        "This Idempotency-Key was already used with a different body",
+      );
+    }
+
+    return next.handle().pipe(
+      concatMap(async (body) => {
+        await this.store.complete(scope, 201, body);
+        return body;
+      }),
+      catchError((err) =>
+        from(this.store.settleFailure(scope, err)).pipe(
+          mergeMap(() => throwError(() => err)),
+        ),
+      ),
+    );
+  }
+}
+```
+
+`settleFailure` is where the thinking is. A `4xx` is deterministic — the same request will fail the same way — so record it as completed and let retries replay the error. A `5xx` or an unknown crash is not deterministic, so release the claim and let the client genuinely try again. Collapsing those two into one branch is how you end up permanently refusing a payment because the database had a bad five seconds.
+
+<Callout emoji="🔗">
+  Write the key row and do the work in the same database transaction. If they
+  are separate, there is a moment where one has happened and the other has
+  not — and whichever way round you arrange it, that moment is a bug.
+</Callout>
+
+## Two things the transaction cannot save you from
+
+**The next hop.** Your transaction covers your database. It does not cover the HTTP call to the payment gateway sitting in the middle of it. If that call times out, you are in exactly the position your client was in at the top of this post, one layer down. The answer is the same answer: pass an idempotency key onward too. Every serious payment provider accepts one. Your guarantee is only as strong as the weakest hop in the chain.
+
+**Expiry.** Keys cannot live forever; the table would grow without bound. Twenty-four hours is the common choice and a reasonable one. But be clear about what expiry means — once the row is gone, a retry carrying that key is just a new request, and it will charge again. That is not a reason to skip expiry. It is a reason to document the window and make sure your client's retry budget is comfortably inside it.
+
+## Where this started
+
+Last week's post was about agent loops, and the fourth failure in it was a tool call that ran twice because the loop retried something it should not have. I said then that it deserved its own post. This is it, and the reason it deserved one is that the fix is not a line of code — it is a schema, a state machine, a header contract and a decision about what a failure means.
+
+Which is also why this is old ground rather than new. Payment systems have been retrying over unreliable networks for decades and the solution has been settled for most of that time. The only thing that changed is who is doing the retrying.
+
+It used to be a phone on a bad connection. Now it is also a loop you wrote, running unattended at three in the morning, and it is considerably more persistent than the phone ever was.
+
+</div>

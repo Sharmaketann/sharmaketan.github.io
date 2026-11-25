@@ -1,0 +1,803 @@
+---
+title: "System Design, Explained With a Housing Society"
+summary: "Most system design writing starts at a million users. This one starts at 200 flats and a tired secretary, puts real numbers on every step, and only scales when a number says to. With the back-of-envelope arithmetic, the growth triggers, and what each stage actually costs per flat."
+type: Blog
+publishedAt: 2026-11-26
+---
+
+<style>{`
+.sd {
+  --ink:#152338; --muted:#5b6b80; --accent:#1d5fa8;
+  --ok:#0f7a5a; --bad:#b1443c; --warn:#a9741c;
+  --card:rgba(255,255,255,.74); --rule:rgba(21,35,56,.24);
+}
+.dark .sd {
+  --ink:#d7e3f2; --muted:#8296ad; --accent:#6fb4ec;
+  --ok:#35c796; --bad:#ef6b63; --warn:#e0a94a;
+  --card:rgba(255,255,255,.04); --rule:rgba(215,227,242,.22);
+}
+/* An architect's hand this time, not the looser one from the last two posts.
+   The whole page is drawn as a blueprint, because the thing being designed
+   is a building full of people. */
+.sd-hand {
+  font-family: var(--font-architects-daughter), "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+}
+/* Blueprint paper. Pale print in the light, cyanotype in the dark — the
+   same drawing, held up to a window or lit from behind. */
+.sd-paper {
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-color:#eef3f9;
+  background-image:
+    repeating-linear-gradient(to right,  transparent 0 23px, rgba(29,95,168,.09) 23px 24px),
+    repeating-linear-gradient(to bottom, transparent 0 23px, rgba(29,95,168,.09) 23px 24px),
+    repeating-linear-gradient(to right,  transparent 0 119px, rgba(29,95,168,.13) 119px 120px),
+    repeating-linear-gradient(to bottom, transparent 0 119px, rgba(29,95,168,.13) 119px 120px),
+    radial-gradient(70% 50% at 15% -10%, rgba(29,95,168,.14), transparent 70%);
+}
+.dark .sd-paper {
+  background-color:#081425;
+  background-image:
+    repeating-linear-gradient(to right,  transparent 0 23px, rgba(140,195,240,.055) 23px 24px),
+    repeating-linear-gradient(to bottom, transparent 0 23px, rgba(140,195,240,.055) 23px 24px),
+    repeating-linear-gradient(to right,  transparent 0 119px, rgba(140,195,240,.085) 119px 120px),
+    repeating-linear-gradient(to bottom, transparent 0 119px, rgba(140,195,240,.085) 119px 120px),
+    radial-gradient(70% 50% at 15% -10%, rgba(111,180,236,.12), transparent 70%);
+}
+/* The margin line of a drawing sheet, once there is room for it to not
+   collide with the text column. */
+@media (min-width: 1400px) {
+  .sd-paper::before {
+    content:""; position:absolute; top:26px; right:26px; bottom:26px; left:26px;
+    border:1px solid rgba(29,95,168,.26);
+    box-shadow:inset 0 0 0 5px rgba(238,243,249,.6), inset 0 0 0 6px rgba(29,95,168,.14);
+  }
+  .dark .sd-paper::before {
+    border-color:rgba(111,180,236,.22);
+    box-shadow:inset 0 0 0 5px rgba(8,20,37,.6), inset 0 0 0 6px rgba(111,180,236,.12);
+  }
+}
+.sd-fig { margin: 2.4rem 0; }
+.sd-fig svg { width:100%; height:auto; display:block; }
+.sd-fig figcaption {
+  font-family: var(--font-architects-daughter), cursive;
+  text-align:center; font-size:1rem; color:var(--muted); margin-top:.45rem;
+}
+.sd-kicker {
+  font-family: var(--font-architects-daughter), cursive;
+  font-size:1.25rem; color:var(--accent); transform:rotate(-.8deg); display:inline-block;
+}
+/* A worked sum, set apart from the prose so it reads as a worksheet. */
+.sd-sum {
+  font-family: var(--font-architects-daughter), cursive;
+  font-size:1.12rem; line-height:1.75; color:var(--ink);
+  border-left:2px solid var(--accent); padding:.3rem 0 .3rem 1rem; margin:1.6rem 0;
+}
+.sd-note {
+  border:1px dashed var(--rule); border-radius:10px;
+  padding:.9rem 1.1rem; margin:1.6rem 0; background:var(--card);
+  font-size:.94rem; color:var(--muted);
+}
+/* A 720-unit drawing squeezed into a 327px phone renders its labels at about
+   five pixels. Let it keep a legible width and scroll sideways instead. */
+@media (max-width: 640px) {
+  .sd-fig { overflow-x:auto; }
+  .sd-fig svg { min-width:600px; }
+}
+`}</style>
+
+<div className="sd-paper" aria-hidden="true" />
+
+<div className="sd">
+
+<p className="sd-kicker">third one in a row about systems that have to behave</p>
+
+Every housing society already runs a management system. It is just not software.
+
+There is a WhatsApp group with 180 members where notices go, and where four of them are arguing about parking. There is a file on the secretary's laptop called `Maintenance_2026_final_v3.xlsx`. There is a register at the gate where the guard writes visitor names in handwriting nobody can read, including the guard. There is a shoebox of receipts. And there is one person, usually the secretary, usually unpaid, usually tired, holding the rest of it together in their head.
+
+That is a real system. It has a database, a notification service, a file store and an API. It also has exactly one server, no backup and no replica, which is why everything stops the week she goes to her daughter's wedding.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 306" role="img" aria-labelledby="sdf1">
+<title id="sdf1">The society as it already works: WhatsApp, a spreadsheet, a gate register and a shoebox, all depending on one person</title>
+<defs>
+<filter id="sdrough" x="-8%" y="-8%" width="116%" height="116%">
+<feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="7" result="n" />
+<feDisplacementMap in="SourceGraphic" in2="n" scale="2.1" xChannelSelector="R" yChannelSelector="G" />
+</filter>
+</defs>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">the system that already exists</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+<rect x="14" y="44" width="150" height="52" rx="8" stroke="var(--ink)" strokeWidth="1.5" fill="var(--card)" />
+<rect x="188" y="44" width="150" height="52" rx="8" stroke="var(--ink)" strokeWidth="1.5" fill="var(--card)" />
+<rect x="362" y="44" width="150" height="52" rx="8" stroke="var(--ink)" strokeWidth="1.5" fill="var(--card)" />
+<rect x="536" y="44" width="170" height="52" rx="8" stroke="var(--ink)" strokeWidth="1.5" fill="var(--card)" />
+
+<path d="M89 98 L300 176" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M263 162 L302 178 L266 182" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M263 98 L330 176" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M318 161 L332 178 L310 180" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M437 98 L390 176" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M404 160 L388 178 L410 180" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M621 98 L420 176" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M457 161 L418 178 L454 182" stroke="var(--muted)" strokeWidth="1.3" />
+
+<rect x="276" y="180" width="168" height="56" rx="10" stroke="var(--bad)" strokeWidth="2" fill="var(--card)" />
+<rect x="14" y="258" width="692" height="40" rx="9" stroke="var(--bad)" strokeWidth="1.4" strokeDasharray="7 6" />
+</g>
+
+<text x="30" y="68" className="sd-hand" fontSize="16" fill="var(--ink)">WhatsApp group</text>
+<text x="30" y="86" className="sd-hand" fontSize="13" fill="var(--muted)">= notification service</text>
+<text x="204" y="68" className="sd-hand" fontSize="16" fill="var(--ink)">Excel on a laptop</text>
+<text x="204" y="86" className="sd-hand" fontSize="13" fill="var(--muted)">= the database</text>
+<text x="378" y="68" className="sd-hand" fontSize="16" fill="var(--ink)">gate register</text>
+<text x="378" y="86" className="sd-hand" fontSize="13" fill="var(--muted)">= the audit log</text>
+<text x="552" y="68" className="sd-hand" fontSize="16" fill="var(--ink)">shoebox of receipts</text>
+<text x="552" y="86" className="sd-hand" fontSize="13" fill="var(--muted)">= object storage</text>
+
+<text x="300" y="206" className="sd-hand" fontSize="17" fill="var(--bad)">one secretary</text>
+<text x="294" y="226" className="sd-hand" fontSize="13" fill="var(--muted)">single point of failure</text>
+
+<text x="28" y="284" className="sd-hand" fontSize="14" fill="var(--bad)">no backup &nbsp;·&nbsp; no replica &nbsp;·&nbsp; no handover &nbsp;·&nbsp; one laptop away from losing four years of accounts</text>
+</svg>
+<figcaption>Every part of a real architecture is already there. It is just made of people and paper.</figcaption>
+</figure>
+
+So let us design the software version. Slowly, in order, with numbers at every step — because the numbers are the part that decides the design, and they are the part everybody skips.
+
+## How we are going to do this
+
+Six steps, and the order matters:
+
+1. Write down what it does.
+2. Put numbers on it.
+3. Draw the smallest thing that works.
+4. Find what breaks first.
+5. Decide what you would change, and at exactly what number.
+6. Cost it.
+
+Most people skip steps 2 and 4, draw step 3 with a message queue and three microservices in it because that is what the diagrams on the internet look like, and then spend nine months building a thing that two hundred families could have run on a laptop.
+
+## Step 1 — what does it actually do
+
+Write the list in plain words. No nouns you cannot explain to the secretary.
+
+- **Maintenance bills.** Generate a bill for every flat each month. Apply late fees. Show a history.
+- **Payments.** Let a resident pay online and get a receipt.
+- **Visitor entry.** The guard logs a visitor at the gate. The resident gets a notification and approves or rejects.
+- **Complaints.** Raise a ticket, assign it, close it.
+- **Notices.** The committee posts something. Everybody sees it.
+- **Documents.** Meeting minutes, audit reports, bye-laws. Uploaded rarely, read rarely.
+
+Now the part people leave out: **how often does each one happen?** That single column changes the entire design.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 330" role="img" aria-labelledby="sdf2">
+<title id="sdf2">Six features, with how often each one happens — only visitor entry runs all day</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">same feature list, with the frequency written in</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+<rect x="14" y="40" width="330" height="56" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<rect x="14" y="108" width="330" height="56" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<rect x="14" y="176" width="330" height="56" rx="8" stroke="var(--ok)" strokeWidth="2.1" fill="var(--card)" />
+<rect x="376" y="40" width="330" height="56" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<rect x="376" y="108" width="330" height="56" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<rect x="376" y="176" width="330" height="56" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<path d="M14 266 L706 266" stroke="var(--rule)" strokeWidth="1.2" strokeDasharray="6 6" />
+</g>
+
+<text x="30" y="64" className="sd-hand" fontSize="16" fill="var(--ink)">maintenance bills</text>
+<text x="30" y="84" className="sd-hand" fontSize="14" fill="var(--muted)">once a month, all at once</text>
+<text x="30" y="132" className="sd-hand" fontSize="16" fill="var(--ink)">payments</text>
+<text x="30" y="152" className="sd-hand" fontSize="14" fill="var(--muted)">once a month per flat, in a rush</text>
+<text x="30" y="200" className="sd-hand" fontSize="16" fill="var(--ok)">visitor entry</text>
+<text x="30" y="220" className="sd-hand" fontSize="14" fill="var(--ok)">all day, every day, forever</text>
+<text x="392" y="64" className="sd-hand" fontSize="16" fill="var(--ink)">complaints</text>
+<text x="392" y="84" className="sd-hand" fontSize="14" fill="var(--muted)">a few a week</text>
+<text x="392" y="132" className="sd-hand" fontSize="16" fill="var(--ink)">notices</text>
+<text x="392" y="152" className="sd-hand" fontSize="14" fill="var(--muted)">a few a month, read by everyone</text>
+<text x="392" y="200" className="sd-hand" fontSize="16" fill="var(--ink)">documents</text>
+<text x="392" y="220" className="sd-hand" fontSize="14" fill="var(--muted)">almost never written, rarely read</text>
+
+<text x="14" y="252" className="sd-hand" fontSize="17" fill="var(--ok)">one of these six is a steady load. the other five are bursts.</text>
+<text x="14" y="292" className="sd-hand" fontSize="15" fill="var(--muted)">a burst is sized by its peak. a steady load is sized by its average.</text>
+<text x="14" y="314" className="sd-hand" fontSize="15" fill="var(--muted)">mix them up and you will buy the wrong machine.</text>
+</svg>
+<figcaption>The frequency column is not a detail. It is the design.</figcaption>
+</figure>
+
+And write down what it does **not** do, in the same place, with the same seriousness. No chat. No social feed. No marketplace. Not because those are bad, but because a scope you have not written down is a scope that grows every time somebody walks past your desk.
+
+## Step 2 — put numbers on it
+
+This is the step that makes the rest easy, and it is just arithmetic. One society, 200 flats.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 430" role="img" aria-labelledby="sdf3">
+<title id="sdf3">Back-of-envelope worksheet estimating about one request per second at peak for a 200-flat society</title>
+
+<text x="12" y="24" className="sd-hand" fontSize="20" fill="var(--accent)">back of the envelope — 200 flats</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round">
+<path d="M12 36 L708 36" stroke="var(--accent)" strokeWidth="1.4" />
+<path d="M12 300 L708 300" stroke="var(--rule)" strokeWidth="1.2" strokeDasharray="6 6" />
+<rect x="12" y="344" width="696" height="74" rx="10" stroke="var(--ok)" strokeWidth="2.1" fill="var(--card)" />
+</g>
+
+<text x="14" y="66"  className="sd-hand" fontSize="16" fill="var(--muted)">people</text>
+<text x="14" y="90"  className="sd-hand" fontSize="16" fill="var(--ink)">200 flats  ×  2 adults who will actually install it</text>
+<text x="560" y="90" className="sd-hand" fontSize="16" fill="var(--accent)">= 400 users</text>
+
+<text x="14" y="126" className="sd-hand" fontSize="16" fill="var(--muted)">visitors</text>
+<text x="14" y="150" className="sd-hand" fontSize="16" fill="var(--ink)">1.5 per flat per day  ×  200</text>
+<text x="560" y="150" className="sd-hand" fontSize="16" fill="var(--accent)">= 300 / day</text>
+<text x="14" y="172" className="sd-hand" fontSize="16" fill="var(--ink)">×  4 calls each (log, notify, approve, close)</text>
+<text x="560" y="172" className="sd-hand" fontSize="16" fill="var(--accent)">= 1,200 / day</text>
+
+<text x="14" y="208" className="sd-hand" fontSize="16" fill="var(--muted)">app opens</text>
+<text x="14" y="232" className="sd-hand" fontSize="16" fill="var(--ink)">400 users  ×  2 opens  ×  8 calls per open</text>
+<text x="560" y="232" className="sd-hand" fontSize="16" fill="var(--accent)">= 6,400 / day</text>
+
+<text x="14" y="268" className="sd-hand" fontSize="16" fill="var(--muted)">payments</text>
+<text x="14" y="292" className="sd-hand" fontSize="16" fill="var(--ink)">200 a month, so on an average day</text>
+<text x="560" y="292" className="sd-hand" fontSize="16" fill="var(--accent)">= 7 / day</text>
+
+<text x="14" y="326" className="sd-hand" fontSize="17" fill="var(--ink)">total  ≈  7,600 requests a day  ≈  0.09 a second on average</text>
+
+<text x="26" y="370" className="sd-hand" fontSize="16" fill="var(--ink)">peak hour is about 15% of the day  →  1,140 / 3,600  ≈  0.32 a second</text>
+<text x="26" y="394" className="sd-hand" fontSize="16" fill="var(--ink)">on the 1st of the month, call it three times that</text>
+<text x="500" y="394" className="sd-hand" fontSize="17" fill="var(--ok)">≈ 1 a second</text>
+</svg>
+<figcaption>One request per second. A small server handles a thousand. Write this number down before you draw anything.</figcaption>
+</figure>
+
+One request per second. Hold that in your head, because almost every instinct you have about architecture is wrong at that number.
+
+Now storage, which is a separate question and usually the more interesting one:
+
+<div className="sd-sum">
+bills &nbsp;→&nbsp; 200 a month × 40 KB of PDF &nbsp;=&nbsp; 8 MB a month &nbsp;=&nbsp; <strong>96 MB a year</strong><br />
+database rows &nbsp;→&nbsp; visitors, payments, tickets &nbsp;≈&nbsp; <strong>40 MB a year</strong><br />
+visitor photos &nbsp;→&nbsp; 300 a day × 150 KB &nbsp;=&nbsp; 45 MB a day &nbsp;=&nbsp; <strong>16 GB a year</strong>
+</div>
+
+Look at the ratio. The photos are four hundred times everything else put together. The whole database for four years fits in a WhatsApp backup; the photos do not.
+
+That is the kind of thing the arithmetic tells you and a diagram never will.
+
+### The average is a lie
+
+Now the shape. A maintenance system is not a steady trickle — it has a heartbeat, once a month, and it is loud.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 332" role="img" aria-labelledby="sdf4">
+<title id="sdf4">Requests per day across one month: a large spike on the first five days and a flat baseline for the rest</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">requests per day, one month</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round">
+<path d="M54 70 L54 272" stroke="var(--rule)" strokeWidth="1.3" />
+<path d="M54 272 L706 272" stroke="var(--rule)" strokeWidth="1.3" />
+</g>
+
+<g fill="var(--accent)" opacity="0.72">
+<rect x="62"  y="70"  width="14" height="202" rx="2" />
+<rect x="83"  y="126" width="14" height="146" rx="2" />
+<rect x="105" y="158" width="14" height="114" rx="2" />
+<rect x="126" y="182" width="14" height="90"  rx="2" />
+<rect x="147" y="190" width="14" height="82"  rx="2" />
+</g>
+<g fill="var(--muted)" opacity="0.55">
+<rect x="168" y="211" width="14" height="61" rx="2" />
+<rect x="190" y="214" width="14" height="58" rx="2" />
+<rect x="211" y="216" width="14" height="56" rx="2" />
+<rect x="232" y="212" width="14" height="60" rx="2" />
+<rect x="253" y="214" width="14" height="58" rx="2" />
+<rect x="275" y="215" width="14" height="57" rx="2" />
+<rect x="296" y="212" width="14" height="60" rx="2" />
+<rect x="317" y="213" width="14" height="59" rx="2" />
+<rect x="338" y="216" width="14" height="56" rx="2" />
+<rect x="360" y="214" width="14" height="58" rx="2" />
+<rect x="381" y="212" width="14" height="60" rx="2" />
+<rect x="402" y="215" width="14" height="57" rx="2" />
+<rect x="423" y="213" width="14" height="59" rx="2" />
+<rect x="445" y="214" width="14" height="58" rx="2" />
+<rect x="466" y="216" width="14" height="56" rx="2" />
+<rect x="487" y="212" width="14" height="60" rx="2" />
+<rect x="508" y="214" width="14" height="58" rx="2" />
+<rect x="530" y="215" width="14" height="57" rx="2" />
+<rect x="551" y="213" width="14" height="59" rx="2" />
+<rect x="572" y="214" width="14" height="58" rx="2" />
+<rect x="593" y="216" width="14" height="56" rx="2" />
+<rect x="615" y="212" width="14" height="60" rx="2" />
+<rect x="636" y="210" width="14" height="62" rx="2" />
+<rect x="657" y="204" width="14" height="68" rx="2" />
+<rect x="678" y="198" width="14" height="74" rx="2" />
+</g>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round">
+<path d="M58 214 L704 214" stroke="var(--ok)" strokeWidth="1.6" strokeDasharray="7 5" />
+<path d="M168 104 L120 80" stroke="var(--bad)" strokeWidth="1.4" />
+<path d="M132 78 L117 79 L124 92" stroke="var(--bad)" strokeWidth="1.4" />
+</g>
+
+<text x="14" y="76"  className="sd-hand" fontSize="13" fill="var(--muted)">25k</text>
+<text x="14" y="218" className="sd-hand" fontSize="13" fill="var(--muted)">7k</text>
+<text x="14" y="276" className="sd-hand" fontSize="13" fill="var(--muted)">0</text>
+<text x="58" y="290" className="sd-hand" fontSize="13" fill="var(--muted)">1st</text>
+<text x="370" y="290" className="sd-hand" fontSize="13" fill="var(--muted)">15th</text>
+<text x="668" y="290" className="sd-hand" fontSize="13" fill="var(--muted)">30th</text>
+
+<text x="176" y="108" className="sd-hand" fontSize="16" fill="var(--bad)">everybody pays at once</text>
+<text x="330" y="202" className="sd-hand" fontSize="15" fill="var(--ok)">visitor entry — the floor you never get below</text>
+<text x="14" y="316" className="sd-hand" fontSize="16" fill="var(--ink)">size the machine for the 1st. size the database for the 15th. they are different questions.</text>
+</svg>
+<figcaption>Averages hide the only day that can actually hurt you.</figcaption>
+</figure>
+
+Three useful things fall out of that picture:
+
+- **The peak is predictable.** You know the date. That is a gift — you can warm things up, or just spread the work out, which is free.
+- **The floor is the real baseline.** Visitor entry never stops, so it sets the minimum size of everything.
+- **Bill generation does not need to be fast.** Nobody is waiting on it. Doing 200 bills in one second and doing them over twenty minutes feel identical to a resident, and one of those needs a much bigger machine.
+
+<div className="sd-note">
+That last point is worth more than any technology choice on this page. A huge amount of what looks like a scaling problem is a batch job someone decided to run all at once for no reason. Spreading work out over time is the cheapest scaling technique there is, and it is usually a one-line change to a cron schedule.
+</div>
+
+## Step 3 — draw the smallest thing that works
+
+One request per second. 16 GB of photos a year. A predictable monthly spike.
+
+Here is the honest answer:
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 300" role="img" aria-labelledby="sdf5">
+<title id="sdf5">One server running the app and the database, with photos in object storage and a nightly backup</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">one society — the whole design</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+<rect x="14" y="48" width="118" height="44" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<rect x="14" y="120" width="118" height="44" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+
+<path d="M136 70 L244 92" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M232 84 L246 93 L230 97" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M136 142 L244 124" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M230 118 L246 123 L231 130" stroke="var(--muted)" strokeWidth="1.3" />
+
+<rect x="248" y="56" width="214" height="110" rx="11" stroke="var(--ok)" strokeWidth="2.1" fill="var(--card)" />
+<rect x="266" y="78" width="178" height="32" rx="6" stroke="var(--ink)" strokeWidth="1.3" />
+<rect x="266" y="120" width="178" height="32" rx="6" stroke="var(--ink)" strokeWidth="1.3" />
+
+<path d="M466 94 L562 94" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M550 88 L564 94 L550 100" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="566" y="70" width="140" height="48" rx="8" stroke="var(--accent)" strokeWidth="1.7" fill="var(--card)" />
+
+<path d="M356 170 L356 214" stroke="var(--muted)" strokeWidth="1.3" strokeDasharray="5 5" />
+<path d="M350 202 L356 216 L362 202" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="266" y="218" width="180" height="52" rx="8" stroke="var(--warn)" strokeWidth="1.6" fill="var(--card)" />
+</g>
+
+<text x="30" y="68"  className="sd-hand" fontSize="15" fill="var(--ink)">resident phone</text>
+<text x="30" y="86"  className="sd-hand" fontSize="12" fill="var(--muted)">400 of them</text>
+<text x="30" y="140" className="sd-hand" fontSize="15" fill="var(--ink)">guard tablet</text>
+<text x="30" y="158" className="sd-hand" fontSize="12" fill="var(--muted)">one at the gate</text>
+
+<text x="256" y="48" className="sd-hand" fontSize="14" fill="var(--ok)">one small server · 2 vCPU · 4 GB</text>
+<text x="280" y="99"  className="sd-hand" fontSize="15" fill="var(--ink)">the app  (one process)</text>
+<text x="280" y="141" className="sd-hand" fontSize="15" fill="var(--ink)">Postgres  (same box)</text>
+
+<text x="582" y="90"  className="sd-hand" fontSize="15" fill="var(--accent)">object storage</text>
+<text x="582" y="108" className="sd-hand" fontSize="12" fill="var(--muted)">photos + bill PDFs</text>
+
+<text x="286" y="240" className="sd-hand" fontSize="12" fill="var(--warn)">nightly backup, off this box</text>
+<text x="286" y="259" className="sd-hand" fontSize="11" fill="var(--muted)">restored once, on purpose</text>
+
+<text x="478" y="240" className="sd-hand" fontSize="15" fill="var(--ink)">that is the entire system.</text>
+<text x="478" y="259" className="sd-hand" fontSize="13" fill="var(--muted)">headroom: about 1000×</text>
+</svg>
+<figcaption>Two boxes and a bucket. At one request per second this is not a compromise — it is correct.</figcaption>
+</figure>
+
+No load balancer. No cache. No queue. No Kubernetes. One machine runs the app and the database, photos go to object storage because disks fill up and buckets do not, and a backup leaves the box every night.
+
+The two things that are not optional, even here:
+
+**The backup has to be restored at least once.** An untested backup is a feeling, not a backup. Restore it onto a spare machine, open the app, look at last month's bills. Then you know.
+
+**Photos must never live on the server's disk.** This is the single cheapest future-proofing decision on the whole page. On day one, writing files to `/var/uploads` and writing them to a bucket are about the same amount of work. On the day you want a second server, one of those choices costs you a weekend and the other costs you nothing.
+
+## Step 4 — what breaks first
+
+Here is where instinct fails most reliably. Ask most engineers what breaks and they say "too many requests". Run the arithmetic forward five years and look at what is actually moving.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 320" role="img" aria-labelledby="sdf6">
+<title id="sdf6">Over five years requests per second stay flat while stored photos climb to 80 GB</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">same society, five years later</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round">
+<path d="M58 54 L58 262" stroke="var(--rule)" strokeWidth="1.3" />
+<path d="M58 262 L700 262" stroke="var(--rule)" strokeWidth="1.3" />
+
+<path d="M62 258 L190 256 L318 254 L446 251 L574 249 L696 246" stroke="var(--ok)" strokeWidth="2" />
+<path d="M62 258 L190 220 L318 182 L446 144 L574 106 L696 68" stroke="var(--bad)" strokeWidth="2.2" />
+</g>
+
+<text x="16" y="60"  className="sd-hand" fontSize="13" fill="var(--muted)">80 GB</text>
+<text x="20" y="266" className="sd-hand" fontSize="13" fill="var(--muted)">0</text>
+<text x="56" y="282" className="sd-hand" fontSize="13" fill="var(--muted)">today</text>
+<text x="320" y="282" className="sd-hand" fontSize="13" fill="var(--muted)">year 2</text>
+<text x="664" y="282" className="sd-hand" fontSize="13" fill="var(--muted)">year 5</text>
+
+<text x="420" y="92"  className="sd-hand" fontSize="17" fill="var(--bad)">photos in storage</text>
+<text x="420" y="112" className="sd-hand" fontSize="13" fill="var(--muted)">16 GB a year, forever, never deleted</text>
+<text x="400" y="224" className="sd-hand" fontSize="16" fill="var(--ok)">requests per second</text>
+<text x="400" y="242" className="sd-hand" fontSize="13" fill="var(--muted)">flat — the society is not getting bigger</text>
+
+<text x="14" y="308" className="sd-hand" fontSize="16" fill="var(--ink)">the thing that grows is not the thing everybody plans for.</text>
+</svg>
+<figcaption>Flats do not multiply. Files do.</figcaption>
+</figure>
+
+The number of flats in a society is fixed by concrete. Traffic is flat for the life of the building. What grows, relentlessly, is **stored bytes** — and the four things that will actually ruin your month are:
+
+1. **Storage, which nobody is watching.** Visitor photos pile up at 16 GB a year and no one ever decides how long to keep them.
+2. **The one box dying.** Not a scaling problem — an availability problem. The secretary calls you at 9pm on the 1st. Two hundred families cannot pay. You are the on-call rota.
+3. **Notification fan-out.** The committee posts a notice and you need to push to 400 devices. Do it inline in the web request and the request times out. This is your first real queue, and it arrives for a reason that has nothing to do with scale.
+4. **The backup you never restored.** See above. This is the one that ends societies' trust in software permanently.
+
+Not one of those is fixed by a bigger server.
+
+## Step 5 — if the size is fixed, stop here
+
+This is the decision people get wrong in both directions, so here it is plainly.
+
+**If the thing you are building serves a fixed number of people, do not build for scale.** One society is 200 flats today and 200 flats in 2040. Scalability is a cost you pay every day — in moving parts, in deploys, in the number of things that can be broken at 2am — and it buys you capacity you have mathematically proven you will never use. One box with a tested backup beats a clever distributed system that one person understands.
+
+**If the number of customers grows, you are building a different product**, and four decisions get very expensive to reverse. Make them on day one, because at this size they are nearly free:
+
+<div className="sd-sum">
+1. &nbsp;a <code>society_id</code> on <strong>every single row</strong>, from the first migration<br />
+2. &nbsp;files in object storage, never on the server's disk<br />
+3. &nbsp;no state on the app server — no sessions, no uploads, no local cache<br />
+4. &nbsp;anything slow goes through a queue, even if the queue is one database table
+</div>
+
+Each of those costs an afternoon now. Adding a tenant column to forty tables that already hold live money, in production, for fifty paying societies, costs considerably more than an afternoon.
+
+Everything else — replicas, caches, shards, autoscaling — you add later, when a number tells you to. Which brings us to the numbers.
+
+## Step 6 — fifty societies
+
+Ten thousand flats. The arithmetic scales linearly, because societies are completely independent of each other:
+
+<div className="sd-sum">
+peak &nbsp;=&nbsp; 1 request/sec × 50 &nbsp;=&nbsp; <strong>~25 a second at the monthly peak</strong><br />
+storage &nbsp;=&nbsp; 16 GB × 50 &nbsp;=&nbsp; <strong>800 GB a year</strong><br />
+notices &nbsp;=&nbsp; one committee posts → <strong>10,000 pushes in a burst</strong>
+</div>
+
+Twenty-five requests a second is still, honestly, one server's work. But something else has changed: fifty societies are paying you, and "it is down, I am restarting it" is no longer a sentence you can say. **You scale out here for availability, not for load** — and knowing which of the two you are buying keeps you from overbuilding.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 352" role="img" aria-labelledby="sdf7">
+<title id="sdf7">Fifty societies: a load balancer, two app servers, a managed database with a standby, a cache, a queue with workers, and a CDN in front of object storage</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">50 societies — split the roles, add a spare of each</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+<rect x="14" y="110" width="96" height="42" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<path d="M114 131 L150 131" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M140 126 L152 131 L140 136" stroke="var(--muted)" strokeWidth="1.3" />
+
+<rect x="154" y="110" width="84" height="42" rx="8" stroke="var(--accent)" strokeWidth="1.7" fill="var(--card)" />
+<path d="M242 124 L282 96" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M272 94 L284 95 L277 106" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M242 140 L282 166" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M272 164 L284 167 L276 156" stroke="var(--muted)" strokeWidth="1.3" />
+
+<rect x="286" y="72" width="112" height="44" rx="8" stroke="var(--ok)" strokeWidth="1.8" fill="var(--card)" />
+<rect x="286" y="146" width="112" height="44" rx="8" stroke="var(--ok)" strokeWidth="1.8" fill="var(--card)" />
+
+<path d="M402 94 L446 94" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M436 89 L448 94 L436 99" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="450" y="60" width="118" height="40" rx="8" stroke="var(--warn)" strokeWidth="1.6" fill="var(--card)" />
+
+<path d="M402 168 L446 168" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M436 163 L448 168 L436 173" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="450" y="124" width="150" height="44" rx="8" stroke="var(--ink)" strokeWidth="1.6" fill="var(--card)" />
+<rect x="450" y="178" width="150" height="36" rx="8" stroke="var(--ink)" strokeWidth="1.3" strokeDasharray="6 5" fill="var(--card)" />
+<path d="M525 168 L525 178" stroke="var(--muted)" strokeWidth="1.2" strokeDasharray="3 3" />
+
+<path d="M402 190 L440 244" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M430 234 L442 246 L426 246" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="444" y="246" width="124" height="40" rx="8" stroke="var(--accent)" strokeWidth="1.6" fill="var(--card)" />
+<path d="M572 266 L612 266" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M602 261 L614 266 L602 271" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="616" y="246" width="92" height="40" rx="8" stroke="var(--accent)" strokeWidth="1.6" fill="var(--card)" />
+
+<path d="M572 80 L612 80" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M602 75 L614 80 L602 85" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="616" y="60" width="92" height="40" rx="8" stroke="var(--warn)" strokeWidth="1.6" fill="var(--card)" />
+</g>
+
+<text x="26" y="125"  className="sd-hand" fontSize="14" fill="var(--ink)">phones +</text>
+<text x="26" y="145"  className="sd-hand" fontSize="14" fill="var(--ink)">guard tablets</text>
+<text x="166" y="127" className="sd-hand" fontSize="14" fill="var(--accent)">load</text>
+<text x="166" y="147" className="sd-hand" fontSize="14" fill="var(--accent)">balancer</text>
+<text x="300" y="92"  className="sd-hand" fontSize="14" fill="var(--ok)">app server 1</text>
+<text x="300" y="109" className="sd-hand" fontSize="12" fill="var(--muted)">stateless</text>
+<text x="300" y="166" className="sd-hand" fontSize="14" fill="var(--ok)">app server 2</text>
+<text x="300" y="183" className="sd-hand" fontSize="12" fill="var(--muted)">identical, boring</text>
+<text x="462" y="78"  className="sd-hand" fontSize="14" fill="var(--warn)">object storage</text>
+<text x="462" y="94"  className="sd-hand" fontSize="12" fill="var(--muted)">800 GB / year</text>
+<text x="630" y="78"  className="sd-hand" fontSize="14" fill="var(--warn)">CDN</text>
+<text x="626" y="94"  className="sd-hand" fontSize="12" fill="var(--muted)">thumbnails</text>
+<text x="462" y="142" className="sd-hand" fontSize="14" fill="var(--ink)">managed Postgres</text>
+<text x="462" y="159" className="sd-hand" fontSize="12" fill="var(--muted)">4 GB, one primary</text>
+<text x="462" y="200" className="sd-hand" fontSize="11" fill="var(--muted)">hot standby, auto failover</text>
+<text x="456" y="264" className="sd-hand" fontSize="14" fill="var(--accent)">queue</text>
+<text x="456" y="280" className="sd-hand" fontSize="12" fill="var(--muted)">notices, bills, PDFs</text>
+<text x="628" y="264" className="sd-hand" fontSize="14" fill="var(--accent)">workers</text>
+<text x="628" y="280" className="sd-hand" fontSize="12" fill="var(--muted)">2 of them</text>
+
+<text x="14" y="318" className="sd-hand" fontSize="16" fill="var(--ink)">25 requests a second does not need any of this. fifty paying customers do.</text>
+<text x="14" y="340" className="sd-hand" fontSize="14" fill="var(--muted)">every box here exists so that one of them can die quietly at 3am.</text>
+</svg>
+<figcaption>The jump from one box to this is about availability. The load has barely moved.</figcaption>
+</figure>
+
+The queue earns its place here properly. A committee posts a notice; the web request writes one row and returns in 20 milliseconds; a worker picks it up and sends 10,000 pushes over the next two minutes. If the push provider is down, the worker retries and nobody's browser spun. That is the whole argument for a queue, and it is an argument about *user-visible latency*, not throughput.
+
+## Step 7 — five thousand societies
+
+A million flats. Now it is a real system.
+
+<div className="sd-sum">
+peak &nbsp;=&nbsp; <strong>~2,500 requests a second</strong><br />
+bill generation &nbsp;=&nbsp; 1,000,000 bills on the 1st. In one hour that is <strong>278 writes/sec</strong> on top of everything else. Spread over 24 hours it is <strong>12/sec</strong>.<br />
+photos &nbsp;=&nbsp; 225 GB a <strong>day</strong>  →  <strong>82 TB a year</strong>
+</div>
+
+Read that middle line again, because it is the best illustration on this page of design mattering more than hardware. The *same* work, scheduled differently, is either a 23× write spike you must buy capacity for, or a rounding error. Nobody is sitting at their phone at 00:00 on the 1st waiting for a bill. Spread it out and the problem disappears for free.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 368" role="img" aria-labelledby="sdf8">
+<title id="sdf8">Five thousand societies: CDN, load balancer, an autoscaling app tier, a cache, a primary database with read replicas, sharding by society when needed, and a storage lifecycle rule</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">5,000 societies — add a cache, replicas, and a retention rule</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+<rect x="14" y="120" width="78" height="40" rx="8" stroke="var(--muted)" strokeWidth="1.4" fill="var(--card)" />
+<path d="M96 140 L124 140" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M114 135 L126 140 L114 145" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="128" y="120" width="72" height="40" rx="8" stroke="var(--warn)" strokeWidth="1.6" fill="var(--card)" />
+<path d="M204 140 L232 140" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M222 135 L234 140 L222 145" stroke="var(--muted)" strokeWidth="1.3" />
+
+<rect x="236" y="104" width="118" height="72" rx="9" stroke="var(--ok)" strokeWidth="2" fill="var(--card)" />
+<rect x="244" y="112" width="102" height="18" rx="4" stroke="var(--ok)" strokeWidth="1.1" />
+<rect x="244" y="134" width="102" height="18" rx="4" stroke="var(--ok)" strokeWidth="1.1" />
+
+<path d="M358 118 L404 90" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M394 88 L406 89 L399 100" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="408" y="62" width="112" height="40" rx="8" stroke="var(--accent)" strokeWidth="1.7" fill="var(--card)" />
+
+<path d="M358 150 L404 166" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M394 164 L406 167 L394 173" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="408" y="126" width="112" height="40" rx="8" stroke="var(--ink)" strokeWidth="1.7" fill="var(--card)" />
+<rect x="408" y="174" width="112" height="30" rx="7" stroke="var(--ink)" strokeWidth="1.2" strokeDasharray="6 5" fill="var(--card)" />
+<rect x="408" y="208" width="112" height="30" rx="7" stroke="var(--ink)" strokeWidth="1.2" strokeDasharray="6 5" fill="var(--card)" />
+<path d="M464 166 L464 174" stroke="var(--muted)" strokeWidth="1.1" strokeDasharray="3 3" />
+<path d="M464 204 L464 208" stroke="var(--muted)" strokeWidth="1.1" strokeDasharray="3 3" />
+
+<path d="M358 176 L398 266" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M388 256 L400 268 L384 267" stroke="var(--muted)" strokeWidth="1.3" />
+<rect x="402" y="268" width="118" height="38" rx="8" stroke="var(--accent)" strokeWidth="1.6" fill="var(--card)" />
+
+<rect x="556" y="62" width="150" height="40" rx="8" stroke="var(--warn)" strokeWidth="1.6" fill="var(--card)" />
+<path d="M524 82 L552 82" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M542 77 L554 82 L542 87" stroke="var(--muted)" strokeWidth="1.3" />
+<path d="M631 106 L631 134" stroke="var(--bad)" strokeWidth="1.3" strokeDasharray="4 4" />
+<path d="M625 124 L631 136 L637 124" stroke="var(--bad)" strokeWidth="1.3" />
+<rect x="556" y="138" width="150" height="64" rx="8" stroke="var(--bad)" strokeWidth="1.7" fill="var(--card)" />
+
+<rect x="548" y="230" width="160" height="80" rx="9" stroke="var(--muted)" strokeWidth="1.3" strokeDasharray="7 6" fill="none" />
+</g>
+
+<text x="24" y="138"  className="sd-hand" fontSize="13" fill="var(--ink)">1M flats</text>
+<text x="24" y="154"  className="sd-hand" fontSize="12" fill="var(--muted)">2,500 r/s</text>
+<text x="140" y="136" className="sd-hand" fontSize="14" fill="var(--warn)">CDN +</text>
+<text x="140" y="155" className="sd-hand" fontSize="14" fill="var(--warn)">balancer</text>
+<text x="250" y="126" className="sd-hand" fontSize="12" fill="var(--ok)">app servers × 8</text>
+<text x="250" y="148" className="sd-hand" fontSize="10" fill="var(--ok)">autoscaled on the 1st</text>
+<text x="250" y="170" className="sd-hand" fontSize="10" fill="var(--muted)">stateless, boring</text>
+<text x="420" y="80"  className="sd-hand" fontSize="14" fill="var(--accent)">Redis cache</text>
+<text x="420" y="96"  className="sd-hand" fontSize="11" fill="var(--muted)">bills, notices</text>
+<text x="420" y="144" className="sd-hand" fontSize="14" fill="var(--ink)">primary DB</text>
+<text x="420" y="160" className="sd-hand" fontSize="12" fill="var(--muted)">all the writes</text>
+<text x="420" y="194" className="sd-hand" fontSize="13" fill="var(--muted)">read replica 1</text>
+<text x="420" y="228" className="sd-hand" fontSize="13" fill="var(--muted)">read replica 2</text>
+<text x="414" y="292" className="sd-hand" fontSize="13" fill="var(--accent)">queue + workers</text>
+<text x="568" y="80"  className="sd-hand" fontSize="14" fill="var(--warn)">object storage</text>
+<text x="568" y="96"  className="sd-hand" fontSize="12" fill="var(--muted)">225 GB a day arriving</text>
+<text x="568" y="158" className="sd-hand" fontSize="14" fill="var(--bad)">lifecycle rule</text>
+<text x="568" y="177" className="sd-hand" fontSize="11" fill="var(--muted)">keep 90 days, then delete</text>
+<text x="568" y="193" className="sd-hand" fontSize="11" fill="var(--muted)">82 TB → 20 TB</text>
+<text x="554" y="252" className="sd-hand" fontSize="12" fill="var(--muted)">shard by society_id —</text>
+<text x="554" y="270" className="sd-hand" fontSize="12" fill="var(--muted)">only when one primary</text>
+<text x="554" y="288" className="sd-hand" fontSize="12" fill="var(--muted)">genuinely cannot keep up.</text>
+<text x="554" y="304" className="sd-hand" fontSize="11" fill="var(--bad)">not yet. probably not ever.</text>
+
+<text x="14" y="340" className="sd-hand" fontSize="16" fill="var(--ink)">the biggest win on this drawing is the dashed red box, and it is a rule, not a machine.</text>
+<text x="14" y="360" className="sd-hand" fontSize="14" fill="var(--muted)">deciding how long to keep a photo saved more money than every server here.</text>
+</svg>
+<figcaption>At a million flats the hard question is not how to store 82 TB. It is whether you need to.</figcaption>
+</figure>
+
+Two things in that drawing are worth saying out loud.
+
+**A retention policy is a scaling technique.** Keep every visitor photo forever and storage grows 82 TB a year, without limit, until it is the largest line on your bill by a wide margin. Keep them 90 days — which is longer than any security purpose requires — and storage settles at about 20 TB and *stays there forever*. No new technology. One configuration rule. It is the single highest-leverage decision in this entire post.
+
+**Sharding is the last resort, not the plan.** A society management system is the most shardable thing imaginable: societies never read each other's data, so `society_id` is a perfect shard key and you will never need a cross-shard join. That makes it tempting. Resist anyway. One decent database primary with two read replicas handles a million flats comfortably, and a sharded system is permanently more expensive to operate, migrate and debug. Keep the shard key on every row so the door stays open, and walk through it only when a graph forces you to.
+
+## The triggers
+
+This is what turns all of the above from an opinion into a plan: write down, in advance, the number that makes you change something. Then you are not guessing, and you are not arguing in a meeting.
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 332" role="img" aria-labelledby="sdf9">
+<title id="sdf9">A table of growth triggers: the measurement on the left and the change it justifies on the right</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">when this happens → do this. not before.</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round">
+<path d="M12 36 L708 36" stroke="var(--accent)" strokeWidth="1.4" />
+<path d="M352 44 L352 300" stroke="var(--rule)" strokeWidth="1.2" strokeDasharray="5 5" />
+<path d="M12 80 L708 80"  stroke="var(--rule)" strokeWidth="1" />
+<path d="M12 124 L708 124" stroke="var(--rule)" strokeWidth="1" />
+<path d="M12 168 L708 168" stroke="var(--rule)" strokeWidth="1" />
+<path d="M12 212 L708 212" stroke="var(--rule)" strokeWidth="1" />
+<path d="M12 256 L708 256" stroke="var(--rule)" strokeWidth="1" />
+<path d="M12 300 L708 300" stroke="var(--rule)" strokeWidth="1" />
+</g>
+
+<text x="14" y="62"  className="sd-hand" fontSize="15" fill="var(--ink)">a notice takes more than 2s to post</text>
+<text x="366" y="62" className="sd-hand" fontSize="15" fill="var(--ok)">move the fan-out to a queue</text>
+<text x="14" y="106"  className="sd-hand" fontSize="15" fill="var(--ink)">downtime now costs a customer</text>
+<text x="366" y="106" className="sd-hand" fontSize="15" fill="var(--ok)">second app server + managed DB standby</text>
+<text x="14" y="150"  className="sd-hand" fontSize="15" fill="var(--ink)">CPU above 60% at the monthly peak</text>
+<text x="366" y="150" className="sd-hand" fontSize="15" fill="var(--ok)">one bigger box first, more boxes second</text>
+<text x="14" y="194"  className="sd-hand" fontSize="15" fill="var(--ink)">reads are 90% of database load</text>
+<text x="366" y="194" className="sd-hand" fontSize="15" fill="var(--ok)">cache, then a read replica</text>
+<text x="14" y="238"  className="sd-hand" fontSize="15" fill="var(--ink)">storage bill &gt; compute bill</text>
+<text x="366" y="238" className="sd-hand" fontSize="15" fill="var(--ok)">retention rule + thumbnails. no new servers.</text>
+<text x="14" y="282"  className="sd-hand" fontSize="15" fill="var(--ink)">write throughput maxes one primary</text>
+<text x="366" y="282" className="sd-hand" fontSize="15" fill="var(--ok)">now, finally, shard on society_id</text>
+
+<text x="14" y="324" className="sd-hand" fontSize="15" fill="var(--muted)">note the order. five cheap moves come before the expensive one.</text>
+</svg>
+<figcaption>Architecture decided in advance, by measurement, is the opposite of architecture decided in a meeting.</figcaption>
+</figure>
+
+## What it costs
+
+Now the part most system design writing leaves out entirely, which is strange, because cost is usually the actual constraint.
+
+<div className="sd-note">
+<strong>The prices below are round, indicative figures</strong> for a mid-range cloud provider in late 2026, converted at about ₹94 to the dollar. They are assumptions, not quotes — put your own provider's numbers in. The point is the arithmetic and the shape of the answer, and both survive being 50% wrong on any single line.
+</div>
+
+Small server ₹1,100/month · medium ₹2,250 · large ₹4,500 · managed database from ₹1,400 · object storage ₹2 per GB per month · CDN egress ₹7.50 per GB · one SMS ₹0.20 · push notifications free.
+
+**One society, 200 flats:**
+
+| | per month |
+|---|---|
+| one medium server (app + database) | ₹2,250 |
+| object storage, 17 GB | ₹34 |
+| egress, 1.4 GB | ₹10 |
+| backups | ₹200 |
+| domain, TLS, monitoring | ₹350 |
+| **total** | **₹2,844** |
+| | **≈ ₹14 per flat per month** |
+
+**Fifty societies, 10,000 flats:**
+
+| | per month |
+|---|---|
+| two medium app servers | ₹4,500 |
+| managed database, 4 GB, with standby | ₹5,600 |
+| object storage, 850 GB | ₹1,700 |
+| CDN egress, 68 GB | ₹510 |
+| cache | ₹1,400 |
+| load balancer | ₹1,100 |
+| SMS fallback, 15,000 messages | ₹3,000 |
+| backups + monitoring | ₹2,000 |
+| **total** | **₹19,810** |
+| | **≈ ₹2 per flat per month** |
+
+**Five thousand societies, 1,000,000 flats:**
+
+| | per month |
+|---|---|
+| eight large app servers | ₹36,000 |
+| database primary + two read replicas | ₹1,31,600 |
+| object storage, 20 TB (with the 90-day rule) | ₹42,000 |
+| CDN egress (thumbnails) | ₹10,000 |
+| cache cluster | ₹15,000 |
+| queue + workers | ₹10,000 |
+| SMS fallback, 750,000 messages | ₹1,50,000 |
+| logs, metrics, monitoring | ₹25,000 |
+| **total** | **₹4,19,600** |
+| | **≈ ₹0.42 per flat per month** |
+
+<figure className="sd-fig">
+<svg viewBox="0 0 720 296" role="img" aria-labelledby="sdf10">
+<title id="sdf10">Cost per flat per month falls from fourteen rupees to two rupees to forty-two paise as the number of flats grows</title>
+
+<text x="12" y="22" className="sd-hand" fontSize="19" fill="var(--accent)">cost per flat, per month</text>
+
+<g filter="url(#sdrough)" fill="none" strokeLinecap="round">
+<path d="M66 50 L66 232" stroke="var(--rule)" strokeWidth="1.3" />
+<path d="M66 232 L700 232" stroke="var(--rule)" strokeWidth="1.3" />
+</g>
+
+<g opacity="0.75">
+<rect x="110" y="62" width="118" height="170" rx="3" fill="var(--bad)" />
+<rect x="300" y="208" width="118" height="24" rx="3" fill="var(--warn)" />
+<rect x="490" y="227" width="118" height="5" rx="2" fill="var(--ok)" />
+</g>
+
+<text x="18" y="68"  className="sd-hand" fontSize="13" fill="var(--muted)">₹14</text>
+<text x="22" y="236" className="sd-hand" fontSize="13" fill="var(--muted)">₹0</text>
+
+<text x="136" y="54"  className="sd-hand" fontSize="18" fill="var(--bad)">₹14.22</text>
+<text x="326" y="200" className="sd-hand" fontSize="18" fill="var(--warn)">₹1.98</text>
+<text x="516" y="219" className="sd-hand" fontSize="18" fill="var(--ok)">₹0.42</text>
+
+<text x="124" y="252" className="sd-hand" fontSize="14" fill="var(--ink)">200 flats</text>
+<text x="118" y="270" className="sd-hand" fontSize="12" fill="var(--muted)">1 society</text>
+<text x="310" y="252" className="sd-hand" fontSize="14" fill="var(--ink)">10,000 flats</text>
+<text x="308" y="270" className="sd-hand" fontSize="12" fill="var(--muted)">50 societies</text>
+<text x="494" y="252" className="sd-hand" fontSize="14" fill="var(--ink)">1,000,000 flats</text>
+<text x="494" y="270" className="sd-hand" fontSize="12" fill="var(--muted)">5,000 societies</text>
+
+<text x="300" y="100" className="sd-hand" fontSize="16" fill="var(--ink)">the fixed costs stop mattering.</text>
+<text x="300" y="122" className="sd-hand" fontSize="14" fill="var(--muted)">that is the only reason scale is worth</text>
+<text x="300" y="140" className="sd-hand" fontSize="14" fill="var(--muted)">the complexity it costs you.</text>
+</svg>
+<figcaption>Thirty-four times cheaper per flat. Nothing else on this page is a thirty-four times improvement.</figcaption>
+</figure>
+
+Two things in those tables deserve attention, and neither is a server.
+
+**The biggest line at a million flats is text messages.** SMS is ₹1,50,000 — about 36% of the bill — while the entire app tier is ₹36,000, or 9%. Every engineering hour you spend shaving the app tier saves less than one product decision to prefer push over SMS and only fall back when a push genuinely fails. At scale the bill stops being an infrastructure problem and becomes a product problem.
+
+**Storage would have been the biggest line without the retention rule.** Three years of keeping everything is 246 TB, which is about ₹4,92,000 a month — more than the rest of the system put together. The 90-day rule is worth more than every optimisation in this post combined, and you can ship it in an afternoon.
+
+## The short version
+
+- Write down what it does, then **write down how often each part happens**. The frequencies decide the design.
+- Do the arithmetic before the drawing. A 200-flat society is about **one request a second**, and almost everything you have read about architecture is irrelevant at one request a second.
+- **The average is a lie.** Look at the shape. Size for the 1st of the month, and then ask whether the spike even needs to be a spike.
+- One box with a **tested** backup is a legitimate, grown-up design. The backup has to be restored at least once or it is not a backup.
+- **If the number of users is fixed, do not buy scalability.** You pay for it daily and it buys capacity you have proven you will not use.
+- **If it grows, spend one afternoon on the four things that are brutal to retrofit:** a tenant id on every row, files in object storage, no state on the app server, slow work behind a queue.
+- Add everything else against a **written trigger**, in order: queue, then a second server, then a bigger server, then a cache, then a replica, then a retention rule — and only then, if a graph insists, a shard.
+- Scaling out is usually bought for **availability**, not throughput. Know which one you are paying for.
+- The cheapest wins are not technology. **Spreading a batch over 24 hours, and deciding how long to keep a photo**, each beat every server choice on this page.
+
+System design is not the art of drawing impressive boxes. It is working out which number is going to move, how far, and doing the smallest thing that survives it.
+
+---
+
+*Previously: [Idempotency Keys for Endpoints That Move Money](/blog/idempotency-keys), and [Loop Engineering, Part Two: What Breaks](/blog/loop-engineering-what-breaks).*
+
+</div>

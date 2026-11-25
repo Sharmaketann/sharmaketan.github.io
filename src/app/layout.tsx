@@ -9,7 +9,7 @@ import { TickerTape } from "@/components/ticker-tape";
 import { SiteBackdrop } from "@/components/site-backdrop";
 import { Footer } from "@/components/footer";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Space_Grotesk, Caveat } from "next/font/google";
+import { Space_Grotesk, Caveat, Architects_Daughter } from "next/font/google";
 import { siteMetadata } from "@/data/siteMetadata";
 import Head from "./head";
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -34,6 +34,17 @@ const caveat = Caveat({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-caveat",
+});
+
+// A second hand, squarer and more draughtsman-like than Caveat. The system
+// design post is drawn as a blueprint, and an architect's lettering is the
+// right voice for it. Same deal as above: variable only, so the file is not
+// fetched on pages that never label a diagram.
+const architectsDaughter = Architects_Daughter({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-architects-daughter",
 });
 
 export const metadata: Metadata = {
@@ -126,6 +137,7 @@ export default function RootLayout({
           "min-h-screen overflow-x-clip antialiased bg-white text-gray-900 dark:bg-zinc-950 dark:text-gray-100",
           space_grotesk.className,
           caveat.variable,
+          architectsDaughter.variable,
         )}
       >
         <ThemeProvider
